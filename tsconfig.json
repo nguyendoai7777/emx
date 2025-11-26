@@ -4,10 +4,16 @@
   "files": [],
   "references": [
     {
-      "path": "./apps/server-api-e2e"
+      "path": "./apps/server-api"
     },
     {
-      "path": "./apps/server-api"
+      "path": "./packages/core"
+    },
+    {
+      "path": "./packages/types"
+    },
+    {
+      "path": "./packages/dto"
     }
   ]
 }
