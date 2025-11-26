@@ -1,0 +1,26 @@
+{
+  "name": "@emx/server-api-e2e",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "implicitDependencies": [
+      "@emx/server-api"
+    ],
+    "targets": {
+      "e2e": {
+        "executor": "@nx/jest:jest",
+        "outputs": [
+          "{projectRoot}/test-output/jest/coverage"
+        ],
+        "options": {
+          "jestConfig": "apps/server-api-e2e/jest.config.cts",
+          "passWithNoTests": true
+        },
+        "dependsOn": [
+          "@emx/server-api:build",
+          "@emx/server-api:serve"
+        ]
+      }
+    }
+  }
+}
