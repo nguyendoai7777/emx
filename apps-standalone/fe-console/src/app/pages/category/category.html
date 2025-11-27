@@ -1,0 +1,41 @@
+<table>
+  <thead>
+    <tr>
+      @for (h of headers; track $index) {
+        <th class="text-left">{{ h }}</th>
+      }
+    </tr>
+  </thead>
+  <tbody>
+    @for (b of data(); track b.id) {
+      <tr
+        [class.selected]="c.selectedCategory()?.id === b.id || selectedCategoryItem()?.id === b.id"
+        (click)="selectedCategory(b)"
+        (mousedown)="selectedCategoryForMenu(b)"
+        [cdkContextMenuTriggerFor]="contextMenu"
+      >
+        <td>{{ b.id }}</td>
+        <td>{{ b.label }}</td>
+        <td>{{ b.value }}</td>
+        <td>{{ b.createdAt | date: 'dd/MM/yyyy' }}</td>
+        <td>{{ b.updatedAt | date: 'dd/MM/yyyy' }}</td>
+      </tr>
+    }
+  </tbody>
+</table>
+
+<ng-template #contextMenu>
+  @let item = selectedCategoryItem();
+  <div
+    style="--mat-button-text-container-height: var(--control-height); --mat-button-text-container-shape: 0"
+    class="flex flex-col py-2 rounded-xl bg-black min-w-[200px]"
+    cdkMenu
+    (closed)="selectedCategoryForMenu(undefined)"
+  >
+    <div class="my-3 px-2 text-xs">{{ item?.label }} - {{ item?.value }}</div>
+    <button matButton="text" class="w-full h-[36px]" cdkMenuItem>Ẩn</button>
+    <button matButton="text" class="w-full h-[36px]" cdkMenuItem>Xóa</button>
+  </div>
+</ng-template>
+
+<create-category #c (enter)="createOrSave()" />

@@ -1,9 +1,10 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { DtoCategory, DtoPagination } from '@emx/dto';
+import { DtoCategory, DtoCategoryDeleteQuery, DtoPagination } from '@emx/dto';
 import { CategoryService } from './category.service';
 import { ResponseFactory, ResponsePaginationFactory } from '@emx/core';
 import { TransformParams } from '@decorators';
+import { SuccessMessage } from '@constants';
 
 @Controller('category')
 @ApiTags('Console')
@@ -36,6 +37,15 @@ export class CategoryController {
       pagination: {
         total,
       },
+    });
+  }
+
+  @Delete()
+  async deleteMany(@Query(TransformParams()) query: DtoCategoryDeleteQuery) {
+    await this.category$$.deleteMany(query.id);
+    return new ResponseFactory({
+      status: HttpStatus.OK,
+      message: SuccessMessage.Delete,
     });
   }
 }

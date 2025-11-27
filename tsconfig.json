@@ -7,9 +7,6 @@
       "path": "./apps/fe-shop"
     },
     {
-      "path": "./apps/fe-console"
-    },
-    {
       "path": "./apps/server-api"
     },
     {

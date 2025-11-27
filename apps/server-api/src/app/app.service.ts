@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaClientService } from '@prisma-provider';
+import { PrismaClientService, Role } from '@prisma-provider';
 import { hash } from 'argon2';
-import { $Enums } from '@prisma-client';
 
 @Injectable()
 export class AppService {
@@ -15,7 +14,7 @@ export class AppService {
       create: {
         email: adminEmail,
         password: passwordHash,
-        role: $Enums.Role.ADMIN,
+        role: Role.ADMIN,
         username: 'admin',
         phone: '0336224228',
       },

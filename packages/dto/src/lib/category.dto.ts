@@ -9,3 +9,9 @@ export class DtoCategory {
   @IsDefined()
   value: string;
 }
+
+export class DtoCategoryDeleteQuery {
+  @IsNotEmpty()
+  @IsDefined()
+  id: string;
+}

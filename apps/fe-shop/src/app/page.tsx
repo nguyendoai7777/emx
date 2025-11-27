@@ -8,7 +8,7 @@ export default function Index() {
    */
   return (
     <div className="h-[200svh]">
-      <Button>Con</Button>
+      <>Con</>
     </div>
   );
 }

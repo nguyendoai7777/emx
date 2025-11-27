@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaClientService } from '@prisma-provider';
 import { DtoCategory, DtoPagination } from '@emx/dto';
 
@@ -9,6 +9,17 @@ export class CategoryService {
   create(body: DtoCategory) {
     return this.prisma.category.create({
       data: body,
+    });
+  }
+
+  deleteMany(id: string) {
+    const ids = id.split(',').map(Number);
+    return this.prisma.category.deleteMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
     });
   }
 

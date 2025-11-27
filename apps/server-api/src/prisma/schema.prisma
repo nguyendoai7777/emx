@@ -1,11 +1,95 @@
-datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+generator client {
+  provider = "prisma-client"
+  output   = "./generated"
 }
 
-generator client {
-  provider = "prisma-client-js"
-  output   = "./client"
+datasource db {
+  provider = "mysql"
+}
+
+model Product {
+  id               Int            @id @default(autoincrement())
+  name             String
+  brand            String?
+  title            String
+  description      String?
+  price            Int
+  stock            Int            @default(0)
+  discountPercent  Int?
+  createdAt        DateTime       @default(now())
+  categoryId       Int
+  conditionType    ConditionType  @default(NEW)
+  conditionPercent Int            @default(100)
+  orderItems       OrderItem[]
+  category         Category       @relation(fields: [categoryId], references: [id])
+  images           ProductImage[]
+
+  @@index([categoryId], map: "Product_categoryId_fkey")
+}
+
+model ProductImage {
+  id        Int     @id @default(autoincrement())
+  productId Int
+  url       String
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@index([productId], map: "ProductImage_productId_fkey")
+}
+
+model Category {
+  id        Int       @id @default(autoincrement())
+  label     String    @unique
+  value     String    @unique
+  status    Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[]
+}
+
+model Order {
+  id           Int         @id @default(autoincrement())
+  userId       Int
+  fullName     String
+  phone        String
+  address      String
+  note         String?
+  shopNote     String?
+  deliveryDate DateTime?
+  totalPrice   Int
+  status       OrderStatus @default(PENDING)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  user         User        @relation(fields: [userId], references: [id])
+  items        OrderItem[]
+
+  @@index([userId], map: "Order_userId_fkey")
+}
+
+model OrderItem {
+  id               Int           @id @default(autoincrement())
+  orderId          Int
+  productId        Int
+  quantity         Int
+  price            Int
+  conditionType    ConditionType
+  conditionPercent Int
+  order            Order         @relation(fields: [orderId], references: [id])
+  product          Product       @relation(fields: [productId], references: [id])
+
+  @@index([orderId], map: "OrderItem_orderId_fkey")
+  @@index([productId], map: "OrderItem_productId_fkey")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  username  String   @unique
+  role      Role     @default(USER)
+  phone     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orders    Order[]
 }
 
 enum Role {
@@ -25,103 +109,4 @@ enum ConditionType {
   NEW
   LIKE_NEW
   USED
-}
-
-model Product {
-  id              Int      @id @default(autoincrement())
-  name            String
-  brand           String?
-  title           String
-  description     String?
-  price           Int
-  stock           Int      @default(0)
-  discountPercent Int?
-  createdAt       DateTime @default(now())
-
-  // Category (1 product -> 1 category)
-  category   Category @relation(fields: [categoryId], references: [id])
-  categoryId Int
-
-  // Product condition
-  conditionType    ConditionType @default(NEW) // NEW, LIKE_NEW, USED
-  conditionPercent Int           @default(100) // 100, 95, 90, 80...
-
-  // Images: lưu dạng JSON list (Shopee style)
-  images ProductImage[]
-
-  orderItems OrderItem[]
-}
-
-model ProductImage {
-  id        Int     @id @default(autoincrement())
-  productId Int
-  product   Product @relation(fields: [productId], references: [id])
-
-  url String
-}
-
-model Category {
-  id        Int       @id @default(autoincrement())
-  label     String    @unique
-  value     String    @unique
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  products  Product[]
-}
-
-model Order {
-  id     Int  @id @default(autoincrement())
-  user   User @relation(fields: [userId], references: [id])
-  userId Int
-
-  // Thông tin giao hàng
-  fullName String
-  phone    String
-  address  String
-  note     String? // ghi chú của khách
-  shopNote String? // ghi chú của shop
-
-  // Thời gian giao hàng mong muốn
-  deliveryDate DateTime?
-
-  // Tổng tiền
-  totalPrice Int
-
-  // Trạng thái
-  status OrderStatus @default(PENDING)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Items
-  items OrderItem[]
-}
-
-model OrderItem {
-  id      Int   @id @default(autoincrement())
-  order   Order @relation(fields: [orderId], references: [id])
-  orderId Int
-
-  product   Product @relation(fields: [productId], references: [id])
-  productId Int
-
-  quantity Int // số lượng
-  price    Int // giá tại thời điểm đặt (snapshot)
-
-  // nếu sản phẩm có condition (NEW, LIKE_NEW, USED) thì lưu tại thời điểm mua
-  conditionType    ConditionType
-  conditionPercent Int
-}
-
-model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  username  String
-  role      Role     @default(USER)
-  phone     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  orders Order[]
 }

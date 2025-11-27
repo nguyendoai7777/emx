@@ -7,4 +7,7 @@ export default defineConfig({
     path: 'apps/server-api/src/prisma/migrations',
     seed: 'apps/server-api/src/prisma/seed.ts',
   },
+  datasource: {
+    url: env('DATABASE_URL'),
+  },
 });

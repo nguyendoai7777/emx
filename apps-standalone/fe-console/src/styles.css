@@ -1,0 +1,61 @@
+@import 'tailwindcss';
+
+:root {
+  color-scheme: light dark;
+  --control-height: 36px;
+  --color-bg-hover: #ffffff0f;
+}
+
+@theme {
+}
+html body {
+  min-height: 100svh;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: var(--mat-sys-surface);
+
+    color: #e0e0e0; /* Chữ sáng */
+  }
+
+  img {
+    filter: brightness(0.8) contrast(1.2);
+  }
+}
+create-category,
+setting {
+  display: block;
+}
+
+table {
+  th,
+  td {
+    height: var(--control-height);
+    padding-inline: 6px;
+  }
+
+  tr:has(td) {
+    transition: 0.2s;
+
+    &:hover {
+      &:not(.selected) {
+        background: var(--color-bg-hover);
+      }
+    }
+
+    &.selected,
+    &.selected:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+  }
+}
+
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+}

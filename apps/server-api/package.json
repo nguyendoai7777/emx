@@ -68,7 +68,8 @@
         },
         "configurations": {
           "development": {
-            "buildTarget": "@emx/server-api:build:development"
+            "buildTarget": "@emx/server-api:build:development",
+            "inspect": false
           },
           "production": {
             "buildTarget": "@emx/server-api:build:production"
