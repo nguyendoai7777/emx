@@ -1,0 +1,7 @@
+<mat-nav-list>
+  @for (item of SideList; track $index) {
+    <a routerLinkActive="active" [routerLink]="item.data.absoluteUrl" mat-list-item class="duration-200 mt-1">
+      {{ item.title }}
+    </a>
+  }
+</mat-nav-list>

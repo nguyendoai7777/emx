@@ -1,4 +1,4 @@
-import { ResponseBase, ResponseWithPagination } from '@jpa/types';
+import { ResponseBase, ResponseWithPagination } from '@emx/types';
 
 export class ResponseFactory<T = void> {
   constructor(protected option: ResponseBase<T>) {}

@@ -1,0 +1,127 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "./client"
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPING
+  COMPLETED
+  CANCELED
+}
+
+enum ConditionType {
+  NEW
+  LIKE_NEW
+  USED
+}
+
+model Product {
+  id              Int      @id @default(autoincrement())
+  name            String
+  brand           String?
+  title           String
+  description     String?
+  price           Int
+  stock           Int      @default(0)
+  discountPercent Int?
+  createdAt       DateTime @default(now())
+
+  // Category (1 product -> 1 category)
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId Int
+
+  // Product condition
+  conditionType    ConditionType @default(NEW) // NEW, LIKE_NEW, USED
+  conditionPercent Int           @default(100) // 100, 95, 90, 80...
+
+  // Images: lưu dạng JSON list (Shopee style)
+  images ProductImage[]
+
+  orderItems OrderItem[]
+}
+
+model ProductImage {
+  id        Int     @id @default(autoincrement())
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+
+  url String
+}
+
+model Category {
+  id        Int       @id @default(autoincrement())
+  label     String    @unique
+  value     String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[]
+}
+
+model Order {
+  id     Int  @id @default(autoincrement())
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+
+  // Thông tin giao hàng
+  fullName String
+  phone    String
+  address  String
+  note     String? // ghi chú của khách
+  shopNote String? // ghi chú của shop
+
+  // Thời gian giao hàng mong muốn
+  deliveryDate DateTime?
+
+  // Tổng tiền
+  totalPrice Int
+
+  // Trạng thái
+  status OrderStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Items
+  items OrderItem[]
+}
+
+model OrderItem {
+  id      Int   @id @default(autoincrement())
+  order   Order @relation(fields: [orderId], references: [id])
+  orderId Int
+
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+
+  quantity Int // số lượng
+  price    Int // giá tại thời điểm đặt (snapshot)
+
+  // nếu sản phẩm có condition (NEW, LIKE_NEW, USED) thì lưu tại thời điểm mua
+  conditionType    ConditionType
+  conditionPercent Int
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  username  String
+  role      Role     @default(USER)
+  phone     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders Order[]
+}

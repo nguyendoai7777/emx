@@ -1,0 +1,9 @@
+<ng-container>
+  <div (click)="un.focus()" (keydown.enter)="login()">User name</div>
+  <text-field #un [field]="loginForm.username" />
+
+  <div (click)="pw.focus()" class="mt-2" (keydown.enter)="login()">Password</div>
+  <text-field #pw type="password" [field]="loginForm.password" [state]="fieldError(loginForm.password)" />
+
+  <c-button class="mt-2" fullWidth (click)="login()">Đăng nhập</c-button>
+</ng-container>

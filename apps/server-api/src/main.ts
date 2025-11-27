@@ -1,19 +1,36 @@
-/**
- * This is not a production server yet!
- * This is only a minimal backend to get started.
- */
-
-import { Logger } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { NoCacheInterceptor, ResponseInterceptor } from '@interceptors';
+import { c } from '@emx/core';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bufferLogs: true,
+    logger: ['error', 'warn'],
+  });
+  const port = 4990;
   const globalPrefix = 'api';
+  app.enableCors({});
   app.setGlobalPrefix(globalPrefix);
-  const port = process.env.PORT || 3000;
+
+  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalInterceptors(new NoCacheInterceptor(), new ResponseInterceptor());
+  const config = new DocumentBuilder()
+    .setTitle('Shop app api')
+    .setDescription('The cats API description')
+    .setVersion('1.0')
+    .build();
+  const documentFactory = () => SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, documentFactory);
+
   await app.listen(port);
-  Logger.log(`🚀 Application is running on: http://localhost:${port}/${globalPrefix}`);
+  console.log(
+    c.green`🚀 Application is running on:`,
+    c.blueBright.underline(`http://localhost:${port}/${globalPrefix}`)
+  );
 }
 
-bootstrap();
+void bootstrap();

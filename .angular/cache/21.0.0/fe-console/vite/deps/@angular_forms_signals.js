@@ -1,0 +1,2688 @@
+import { AbstractControl, NG_VALUE_ACCESSOR, NgControl, Validators } from './chunk-DBXJDY73.js';
+import { httpResource } from './chunk-O7LISFRQ.js';
+import './chunk-7LA4MYMM.js';
+import './chunk-UC72YTJX.js';
+import {
+  APP_ID,
+  Directive,
+  InjectionToken,
+  Injector,
+  Input,
+  SIGNAL,
+  computed,
+  effect,
+  inject,
+  input,
+  isPromise,
+  linkedSignal,
+  resource,
+  runInInjectionContext,
+  setClassMetadata,
+  signal,
+  untracked,
+  ɵCONTROL,
+  ɵɵProvidersFeature,
+  ɵɵdefineDirective,
+} from './chunk-WKLQYTUL.js';
+import { __spreadProps, __spreadValues } from './chunk-PJVWDKLX.js';
+
+// node_modules/@angular/forms/fesm2022/_structure-chunk.mjs
+function isArray(value) {
+  return Array.isArray(value);
+}
+function isObject(value) {
+  return (typeof value === 'object' || typeof value === 'function') && value != null;
+}
+function reduceChildren(node, initialValue, fn, shortCircuit) {
+  const childrenMap = node.structure.childrenMap();
+  if (!childrenMap) {
+    return initialValue;
+  }
+  let value = initialValue;
+  for (const child of childrenMap.values()) {
+    if (shortCircuit?.(value)) {
+      break;
+    }
+    value = fn(child, value);
+  }
+  return value;
+}
+function shortCircuitFalse(value) {
+  return !value;
+}
+function shortCircuitTrue(value) {
+  return value;
+}
+function calculateValidationSelfStatus(state) {
+  if (state.errors().length > 0) {
+    return 'invalid';
+  }
+  if (state.pending()) {
+    return 'unknown';
+  }
+  return 'valid';
+}
+var FieldValidationState = class {
+  node;
+  constructor(node) {
+    this.node = node;
+  }
+  rawSyncTreeErrors = computed(
+    () => {
+      if (this.shouldSkipValidation()) {
+        return [];
+      }
+      return [
+        ...this.node.logicNode.logic.syncTreeErrors.compute(this.node.context),
+        ...(this.node.structure.parent?.validationState.rawSyncTreeErrors() ?? []),
+      ];
+    },
+    __spreadValues(
+      {},
+      ngDevMode
+        ? {
+            debugName: 'rawSyncTreeErrors',
+          }
+        : {}
+    )
+  );
+  syncErrors = computed(
+    () => {
+      if (this.shouldSkipValidation()) {
+        return [];
+      }
+      return [
+        ...this.node.logicNode.logic.syncErrors.compute(this.node.context),
+        ...this.syncTreeErrors(),
+        ...normalizeErrors(this.node.submitState.serverErrors()),
+      ];
+    },
+    __spreadValues(
+      {},
+      ngDevMode
+        ? {
+            debugName: 'syncErrors',
+          }
+        : {}
+    )
+  );
+  syncValid = computed(
+    () => {
+      if (this.shouldSkipValidation()) {
+        return true;
+      }
+      return reduceChildren(
+        this.node,
+        this.syncErrors().length === 0,
+        (child, value) => value && child.validationState.syncValid(),
+        shortCircuitFalse
+      );
+    },
+    __spreadValues(
+      {},
+      ngDevMode
+        ? {
+            debugName: 'syncValid',
+          }
+        : {}
+    )
+  );
+  syncTreeErrors = computed(
+    () => this.rawSyncTreeErrors().filter((err) => err.field === this.node.fieldProxy),
+    __spreadValues(
+      {},
+      ngDevMode
+        ? {
+            debugName: 'syncTreeErrors',
+          }
+        : {}
+    )
+  );
+  rawAsyncErrors = computed(
+    () => {
+      if (this.shouldSkipValidation()) {
+        return [];
+      }
+      return [
+        ...this.node.logicNode.logic.asyncErrors.compute(this.node.context),
+        ...(this.node.structure.parent?.validationState.rawAsyncErrors() ?? []),
+      ];
+    },
+    __spreadValues(
+      {},
+      ngDevMode
+        ? {
+            debugName: 'rawAsyncErrors',
+          }
+        : {}
+    )
+  );
+  asyncErrors = computed(
+    () => {
+      if (this.shouldSkipValidation()) {
+        return [];
+      }
+      return this.rawAsyncErrors().filter((err) => err === 'pending' || err.field === this.node.fieldProxy);
+    },
+    __spreadValues(
+      {},
+      ngDevMode
+        ? {
+            debugName: 'asyncErrors',
+          }
+        : {}
+    )
+  );
+  errors = computed(
+    () => [...this.syncErrors(), ...this.asyncErrors().filter((err) => err !== 'pending')],
+    __spreadValues(
+      {},
+      ngDevMode
+        ? {
+            debugName: 'errors',
+          }
+        : {}
+    )
+  );
+  errorSummary = computed(
+    () => reduceChildren(this.node, this.errors(), (child, result) => [...result, ...child.errorSummary()]),
+    __spreadValues(
+      {},
+      ngDevMode
+        ? {
+            debugName: 'errorSummary',
+          }
+        : {}
+    )
+  );
+  pending = computed(
+    () =>
+      reduceChildren(
+        this.node,
+        this.asyncErrors().includes('pending'),
+        (child, value) => value || child.validationState.asyncErrors().includes('pending')
+      ),
+    __spreadValues(
+      {},
+      ngDevMode
+        ? {
+            debugName: 'pending',
+          }
+        : {}
+    )
+  );
+  status = computed(
+    () => {
+      if (this.shouldSkipValidation()) {
+        return 'valid';
+      }
+      let ownStatus = calculateValidationSelfStatus(this);
+      return reduceChildren(
+        this.node,
+        ownStatus,
+        (child, value) => {
+          if (value === 'invalid' || child.validationState.status() === 'invalid') {
+            return 'invalid';
+          } else if (value === 'unknown' || child.validationState.status() === 'unknown') {
+            return 'unknown';
+          }
+          return 'valid';
+        },
+        (v) => v === 'invalid'
+      );
+    },
+    __spreadValues(
+      {},
+      ngDevMode
+        ? {
+            debugName: 'status',
+          }
+        : {}
+    )
+  );
+  valid = computed(
+    () => this.status() === 'valid',
+    __spreadValues(
+      {},
+      ngDevMode
+        ? {
+            debugName: 'valid',
+          }
+        : {}
+    )
+  );
+  invalid = computed(
+    () => this.status() === 'invalid',
+    __spreadValues(
+      {},
+      ngDevMode
+        ? {
+            debugName: 'invalid',
+          }
+        : {}
+    )
+  );
+  shouldSkipValidation = computed(
+    () => this.node.hidden() || this.node.disabled() || this.node.readonly(),
+    __spreadValues(
+      {},
+      ngDevMode
+        ? {
+            debugName: 'shouldSkipValidation',
+          }
+        : {}
+    )
+  );
+};
+function normalizeErrors(error) {
+  if (error === void 0) {
+    return [];
+  }
+  if (isArray(error)) {
+    return error;
+  }
+  return [error];
+}
+function addDefaultField(errors, field) {
+  if (isArray(errors)) {
+    for (const error of errors) {
+      error.field ??= field;
+    }
+  } else if (errors) {
+    errors.field ??= field;
+  }
+  return errors;
+}
+var boundPathDepth = 0;
+function getBoundPathDepth() {
+  return boundPathDepth;
+}
+function setBoundPathDepthForResolution(fn, depth) {
+  return (...args) => {
+    try {
+      boundPathDepth = depth;
+      return fn(...args);
+    } finally {
+      boundPathDepth = 0;
+    }
+  };
+}
+var DYNAMIC = Symbol();
+var IGNORED = Symbol();
+var AbstractLogic = class {
+  predicates;
+  fns = [];
+  constructor(predicates) {
+    this.predicates = predicates;
+  }
+  push(logicFn) {
+    this.fns.push(wrapWithPredicates(this.predicates, logicFn));
+  }
+  mergeIn(other) {
+    const fns = this.predicates ? other.fns.map((fn) => wrapWithPredicates(this.predicates, fn)) : other.fns;
+    this.fns.push(...fns);
+  }
+};
+var BooleanOrLogic = class extends AbstractLogic {
+  get defaultValue() {
+    return false;
+  }
+  compute(arg) {
+    return this.fns.some((f) => {
+      const result = f(arg);
+      return result && result !== IGNORED;
+    });
+  }
+};
+var ArrayMergeIgnoreLogic = class _ArrayMergeIgnoreLogic extends AbstractLogic {
+  ignore;
+  static ignoreNull(predicates) {
+    return new _ArrayMergeIgnoreLogic(predicates, (e) => e === null);
+  }
+  constructor(predicates, ignore) {
+    super(predicates);
+    this.ignore = ignore;
+  }
+  get defaultValue() {
+    return [];
+  }
+  compute(arg) {
+    return this.fns.reduce((prev, f) => {
+      const value = f(arg);
+      if (value === void 0 || value === IGNORED) {
+        return prev;
+      } else if (isArray(value)) {
+        return [...prev, ...(this.ignore ? value.filter((e) => !this.ignore(e)) : value)];
+      } else {
+        if (this.ignore && this.ignore(value)) {
+          return prev;
+        }
+        return [...prev, value];
+      }
+    }, []);
+  }
+};
+var ArrayMergeLogic = class extends ArrayMergeIgnoreLogic {
+  constructor(predicates) {
+    super(predicates, void 0);
+  }
+};
+var AggregateMetadataMergeLogic = class extends AbstractLogic {
+  key;
+  get defaultValue() {
+    return this.key.getInitial();
+  }
+  constructor(predicates, key) {
+    super(predicates);
+    this.key = key;
+  }
+  compute(ctx) {
+    if (this.fns.length === 0) {
+      return this.key.getInitial();
+    }
+    let acc = this.key.getInitial();
+    for (let i = 0; i < this.fns.length; i++) {
+      const item = this.fns[i](ctx);
+      if (item !== IGNORED) {
+        acc = this.key.reduce(acc, item);
+      }
+    }
+    return acc;
+  }
+};
+function wrapWithPredicates(predicates, logicFn) {
+  if (predicates.length === 0) {
+    return logicFn;
+  }
+  return (arg) => {
+    for (const predicate of predicates) {
+      let predicateField = arg.stateOf(predicate.path);
+      const depthDiff = untracked(predicateField.structure.pathKeys).length - predicate.depth;
+      for (let i = 0; i < depthDiff; i++) {
+        predicateField = predicateField.structure.parent;
+      }
+      if (!predicate.fn(predicateField.context)) {
+        return IGNORED;
+      }
+    }
+    return logicFn(arg);
+  };
+}
+var LogicContainer = class {
+  predicates;
+  hidden;
+  disabledReasons;
+  readonly;
+  syncErrors;
+  syncTreeErrors;
+  asyncErrors;
+  aggregateMetadataKeys = /* @__PURE__ */ new Map();
+  metadataFactories = /* @__PURE__ */ new Map();
+  constructor(predicates) {
+    this.predicates = predicates;
+    this.hidden = new BooleanOrLogic(predicates);
+    this.disabledReasons = new ArrayMergeLogic(predicates);
+    this.readonly = new BooleanOrLogic(predicates);
+    this.syncErrors = ArrayMergeIgnoreLogic.ignoreNull(predicates);
+    this.syncTreeErrors = ArrayMergeIgnoreLogic.ignoreNull(predicates);
+    this.asyncErrors = ArrayMergeIgnoreLogic.ignoreNull(predicates);
+  }
+  hasAggregateMetadata(key) {
+    return this.aggregateMetadataKeys.has(key);
+  }
+  getAggregateMetadataEntries() {
+    return this.aggregateMetadataKeys.entries();
+  }
+  getMetadataFactoryEntries() {
+    return this.metadataFactories.entries();
+  }
+  getAggregateMetadata(key) {
+    if (!this.aggregateMetadataKeys.has(key)) {
+      this.aggregateMetadataKeys.set(key, new AggregateMetadataMergeLogic(this.predicates, key));
+    }
+    return this.aggregateMetadataKeys.get(key);
+  }
+  addMetadataFactory(key, factory) {
+    if (this.metadataFactories.has(key)) {
+      throw new Error(`Can't define value twice for the same MetadataKey`);
+    }
+    this.metadataFactories.set(key, factory);
+  }
+  mergeIn(other) {
+    this.hidden.mergeIn(other.hidden);
+    this.disabledReasons.mergeIn(other.disabledReasons);
+    this.readonly.mergeIn(other.readonly);
+    this.syncErrors.mergeIn(other.syncErrors);
+    this.syncTreeErrors.mergeIn(other.syncTreeErrors);
+    this.asyncErrors.mergeIn(other.asyncErrors);
+    for (const [key, metadataLogic] of other.getAggregateMetadataEntries()) {
+      this.getAggregateMetadata(key).mergeIn(metadataLogic);
+    }
+    for (const [key, metadataFactory] of other.getMetadataFactoryEntries()) {
+      this.addMetadataFactory(key, metadataFactory);
+    }
+  }
+};
+var AbstractLogicNodeBuilder = class {
+  depth;
+  constructor(depth) {
+    this.depth = depth;
+  }
+  build() {
+    return new LeafLogicNode(this, [], 0);
+  }
+};
+var LogicNodeBuilder = class _LogicNodeBuilder extends AbstractLogicNodeBuilder {
+  constructor(depth) {
+    super(depth);
+  }
+  current;
+  all = [];
+  addHiddenRule(logic) {
+    this.getCurrent().addHiddenRule(logic);
+  }
+  addDisabledReasonRule(logic) {
+    this.getCurrent().addDisabledReasonRule(logic);
+  }
+  addReadonlyRule(logic) {
+    this.getCurrent().addReadonlyRule(logic);
+  }
+  addSyncErrorRule(logic) {
+    this.getCurrent().addSyncErrorRule(logic);
+  }
+  addSyncTreeErrorRule(logic) {
+    this.getCurrent().addSyncTreeErrorRule(logic);
+  }
+  addAsyncErrorRule(logic) {
+    this.getCurrent().addAsyncErrorRule(logic);
+  }
+  addAggregateMetadataRule(key, logic) {
+    this.getCurrent().addAggregateMetadataRule(key, logic);
+  }
+  addMetadataFactory(key, factory) {
+    this.getCurrent().addMetadataFactory(key, factory);
+  }
+  getChild(key) {
+    if (key === DYNAMIC) {
+      const children = this.getCurrent().children;
+      if (children.size > (children.has(DYNAMIC) ? 1 : 0)) {
+        this.current = void 0;
+      }
+    }
+    return this.getCurrent().getChild(key);
+  }
+  hasLogic(builder) {
+    if (this === builder) {
+      return true;
+    }
+    return this.all.some(({ builder: subBuilder }) => subBuilder.hasLogic(builder));
+  }
+  mergeIn(other, predicate) {
+    if (predicate) {
+      this.all.push({
+        builder: other,
+        predicate: {
+          fn: setBoundPathDepthForResolution(predicate.fn, this.depth),
+          path: predicate.path,
+        },
+      });
+    } else {
+      this.all.push({
+        builder: other,
+      });
+    }
+    this.current = void 0;
+  }
+  getCurrent() {
+    if (this.current === void 0) {
+      this.current = new NonMergeableLogicNodeBuilder(this.depth);
+      this.all.push({
+        builder: this.current,
+      });
+    }
+    return this.current;
+  }
+  static newRoot() {
+    return new _LogicNodeBuilder(0);
+  }
+};
+var NonMergeableLogicNodeBuilder = class extends AbstractLogicNodeBuilder {
+  logic = new LogicContainer([]);
+  children = /* @__PURE__ */ new Map();
+  constructor(depth) {
+    super(depth);
+  }
+  addHiddenRule(logic) {
+    this.logic.hidden.push(setBoundPathDepthForResolution(logic, this.depth));
+  }
+  addDisabledReasonRule(logic) {
+    this.logic.disabledReasons.push(setBoundPathDepthForResolution(logic, this.depth));
+  }
+  addReadonlyRule(logic) {
+    this.logic.readonly.push(setBoundPathDepthForResolution(logic, this.depth));
+  }
+  addSyncErrorRule(logic) {
+    this.logic.syncErrors.push(setBoundPathDepthForResolution(logic, this.depth));
+  }
+  addSyncTreeErrorRule(logic) {
+    this.logic.syncTreeErrors.push(setBoundPathDepthForResolution(logic, this.depth));
+  }
+  addAsyncErrorRule(logic) {
+    this.logic.asyncErrors.push(setBoundPathDepthForResolution(logic, this.depth));
+  }
+  addAggregateMetadataRule(key, logic) {
+    this.logic.getAggregateMetadata(key).push(setBoundPathDepthForResolution(logic, this.depth));
+  }
+  addMetadataFactory(key, factory) {
+    this.logic.addMetadataFactory(key, setBoundPathDepthForResolution(factory, this.depth));
+  }
+  getChild(key) {
+    if (!this.children.has(key)) {
+      this.children.set(key, new LogicNodeBuilder(this.depth + 1));
+    }
+    return this.children.get(key);
+  }
+  hasLogic(builder) {
+    return this === builder;
+  }
+};
+var LeafLogicNode = class _LeafLogicNode {
+  builder;
+  predicates;
+  depth;
+  logic;
+  constructor(builder, predicates, depth) {
+    this.builder = builder;
+    this.predicates = predicates;
+    this.depth = depth;
+    this.logic = builder ? createLogic(builder, predicates, depth) : new LogicContainer([]);
+  }
+  getChild(key) {
+    const childBuilders = this.builder ? getAllChildBuilders(this.builder, key) : [];
+    if (childBuilders.length === 0) {
+      return new _LeafLogicNode(void 0, [], this.depth + 1);
+    } else if (childBuilders.length === 1) {
+      const { builder, predicates } = childBuilders[0];
+      return new _LeafLogicNode(
+        builder,
+        [...this.predicates, ...predicates.map((p) => bindLevel(p, this.depth))],
+        this.depth + 1
+      );
+    } else {
+      const builtNodes = childBuilders.map(
+        ({ builder, predicates }) =>
+          new _LeafLogicNode(
+            builder,
+            [...this.predicates, ...predicates.map((p) => bindLevel(p, this.depth))],
+            this.depth + 1
+          )
+      );
+      return new CompositeLogicNode(builtNodes);
+    }
+  }
+  hasLogic(builder) {
+    return this.builder?.hasLogic(builder) ?? false;
+  }
+};
+var CompositeLogicNode = class _CompositeLogicNode {
+  all;
+  logic;
+  constructor(all) {
+    this.all = all;
+    this.logic = new LogicContainer([]);
+    for (const node of all) {
+      this.logic.mergeIn(node.logic);
+    }
+  }
+  getChild(key) {
+    return new _CompositeLogicNode(this.all.flatMap((child) => child.getChild(key)));
+  }
+  hasLogic(builder) {
+    return this.all.some((node) => node.hasLogic(builder));
+  }
+};
+function getAllChildBuilders(builder, key) {
+  if (builder instanceof LogicNodeBuilder) {
+    return builder.all.flatMap(({ builder: builder2, predicate }) => {
+      const children = getAllChildBuilders(builder2, key);
+      if (predicate) {
+        return children.map(({ builder: builder3, predicates }) => ({
+          builder: builder3,
+          predicates: [...predicates, predicate],
+        }));
+      }
+      return children;
+    });
+  } else if (builder instanceof NonMergeableLogicNodeBuilder) {
+    return [
+      ...(key !== DYNAMIC && builder.children.has(DYNAMIC)
+        ? [
+            {
+              builder: builder.getChild(DYNAMIC),
+              predicates: [],
+            },
+          ]
+        : []),
+      ...(builder.children.has(key)
+        ? [
+            {
+              builder: builder.getChild(key),
+              predicates: [],
+            },
+          ]
+        : []),
+    ];
+  } else {
+    throw new Error('Unknown LogicNodeBuilder type');
+  }
+}
+function createLogic(builder, predicates, depth) {
+  const logic = new LogicContainer(predicates);
+  if (builder instanceof LogicNodeBuilder) {
+    const builtNodes = builder.all.map(
+      ({ builder: builder2, predicate }) =>
+        new LeafLogicNode(builder2, predicate ? [...predicates, bindLevel(predicate, depth)] : predicates, depth)
+    );
+    for (const node of builtNodes) {
+      logic.mergeIn(node.logic);
+    }
+  } else if (builder instanceof NonMergeableLogicNodeBuilder) {
+    logic.mergeIn(builder.logic);
+  } else {
+    throw new Error('Unknown LogicNodeBuilder type');
+  }
+  return logic;
+}
+function bindLevel(predicate, depth) {
+  return __spreadProps(__spreadValues({}, predicate), {
+    depth,
+  });
+}
+var PATH = Symbol('PATH');
+var FieldPathNode = class _FieldPathNode {
+  keys;
+  parent;
+  keyInParent;
+  root;
+  children = /* @__PURE__ */ new Map();
+  fieldPathProxy = new Proxy(this, FIELD_PATH_PROXY_HANDLER);
+  logicBuilder;
+  constructor(keys, root, parent, keyInParent) {
+    this.keys = keys;
+    this.parent = parent;
+    this.keyInParent = keyInParent;
+    this.root = root ?? this;
+    if (!parent) {
+      this.logicBuilder = LogicNodeBuilder.newRoot();
+    }
+  }
+  get builder() {
+    if (this.logicBuilder) {
+      return this.logicBuilder;
+    }
+    return this.parent.builder.getChild(this.keyInParent);
+  }
+  getChild(key) {
+    if (!this.children.has(key)) {
+      this.children.set(key, new _FieldPathNode([...this.keys, key], this.root, this, key));
+    }
+    return this.children.get(key);
+  }
+  mergeIn(other, predicate) {
+    const path = other.compile();
+    this.builder.mergeIn(path.builder, predicate);
+  }
+  static unwrapFieldPath(formPath) {
+    return formPath[PATH];
+  }
+  static newRoot() {
+    return new _FieldPathNode([], void 0, void 0, void 0);
+  }
+};
+var FIELD_PATH_PROXY_HANDLER = {
+  get(node, property) {
+    if (property === PATH) {
+      return node;
+    }
+    return node.getChild(property).fieldPathProxy;
+  },
+};
+var currentCompilingNode = void 0;
+var compiledSchemas = /* @__PURE__ */ new Map();
+var SchemaImpl = class _SchemaImpl {
+  schemaFn;
+  constructor(schemaFn) {
+    this.schemaFn = schemaFn;
+  }
+  compile() {
+    if (compiledSchemas.has(this)) {
+      return compiledSchemas.get(this);
+    }
+    const path = FieldPathNode.newRoot();
+    compiledSchemas.set(this, path);
+    let prevCompilingNode = currentCompilingNode;
+    try {
+      currentCompilingNode = path;
+      this.schemaFn(path.fieldPathProxy);
+    } finally {
+      currentCompilingNode = prevCompilingNode;
+    }
+    return path;
+  }
+  static create(schema2) {
+    if (schema2 instanceof _SchemaImpl) {
+      return schema2;
+    }
+    return new _SchemaImpl(schema2);
+  }
+  static rootCompile(schema2) {
+    try {
+      compiledSchemas.clear();
+      if (schema2 === void 0) {
+        return FieldPathNode.newRoot();
+      }
+      if (schema2 instanceof _SchemaImpl) {
+        return schema2.compile();
+      }
+      return new _SchemaImpl(schema2).compile();
+    } finally {
+      compiledSchemas.clear();
+    }
+  }
+};
+function isSchemaOrSchemaFn(value) {
+  return value instanceof SchemaImpl || typeof value === 'function';
+}
+function assertPathIsCurrent(path) {
+  if (currentCompilingNode !== FieldPathNode.unwrapFieldPath(path).root) {
+    throw new Error(
+      `A FieldPath can only be used directly within the Schema that owns it, **not** outside of it or within a sub-schema.`
+    );
+  }
+}
+var MetadataKey = class {
+  brand;
+  constructor() {}
+};
+function createMetadataKey() {
+  return new MetadataKey();
+}
+var AggregateMetadataKey = class {
+  reduce;
+  getInitial;
+  brand;
+  constructor(reduce, getInitial) {
+    this.reduce = reduce;
+    this.getInitial = getInitial;
+  }
+};
+function reducedMetadataKey(reduce, getInitial) {
+  return new AggregateMetadataKey(reduce, getInitial);
+}
+function listMetadataKey() {
+  return reducedMetadataKey(
+    (acc, item) => (item === void 0 ? acc : [...acc, item]),
+    () => []
+  );
+}
+function minMetadataKey() {
+  return reducedMetadataKey(
+    (prev, next) => {
+      if (prev === void 0) {
+        return next;
+      }
+      if (next === void 0) {
+        return prev;
+      }
+      return Math.min(prev, next);
+    },
+    () => void 0
+  );
+}
+function maxMetadataKey() {
+  return reducedMetadataKey(
+    (prev, next) => {
+      if (prev === void 0) {
+        return next;
+      }
+      if (next === void 0) {
+        return prev;
+      }
+      return Math.max(prev, next);
+    },
+    () => void 0
+  );
+}
+function orMetadataKey() {
+  return reducedMetadataKey(
+    (prev, next) => prev || next,
+    () => false
+  );
+}
+function andMetadataKey() {
+  return reducedMetadataKey(
+    (prev, next) => prev && next,
+    () => true
+  );
+}
+var REQUIRED = orMetadataKey();
+var MIN = maxMetadataKey();
+var MAX = minMetadataKey();
+var MIN_LENGTH = maxMetadataKey();
+var MAX_LENGTH = minMetadataKey();
+var PATTERN = listMetadataKey();
+var DEBOUNCER = reducedMetadataKey(
+  (_, item) => item,
+  () => void 0
+);
+var FieldNodeContext = class {
+  node;
+  cache = /* @__PURE__ */ new WeakMap();
+  constructor(node) {
+    this.node = node;
+  }
+  resolve(target) {
+    if (!this.cache.has(target)) {
+      const resolver = computed(
+        () => {
+          const targetPathNode = FieldPathNode.unwrapFieldPath(target);
+          let field = this.node;
+          let stepsRemaining = getBoundPathDepth();
+          while (stepsRemaining > 0 || !field.structure.logic.hasLogic(targetPathNode.root.builder)) {
+            stepsRemaining--;
+            field = field.structure.parent;
+            if (field === void 0) {
+              throw new Error('Path is not part of this field tree.');
+            }
+          }
+          for (let key of targetPathNode.keys) {
+            field = field.structure.getChild(key);
+            if (field === void 0) {
+              throw new Error(
+                `Cannot resolve path .${targetPathNode.keys.join('.')} relative to field ${['<root>', ...this.node.structure.pathKeys()].join('.')}.`
+              );
+            }
+          }
+          return field.fieldProxy;
+        },
+        __spreadValues(
+          {},
+          ngDevMode
+            ? {
+                debugName: 'resolver',
+              }
+            : {}
+        )
+      );
+      this.cache.set(target, resolver);
+    }
+    return this.cache.get(target)();
+  }
+  get field() {
+    return this.node.fieldProxy;
+  }
+  get state() {
+    return this.node;
+  }
+  get value() {
+    return this.node.structure.value;
+  }
+  get key() {
+    return this.node.structure.keyInParent;
+  }
+  get pathKeys() {
+    return this.node.structure.pathKeys;
+  }
+  index = computed(
+    () => {
+      const key = this.key();
+      if (!isArray(untracked(this.node.structure.parent.value))) {
+        throw new Error(`RuntimeError: cannot access index, parent field is not an array`);
+      }
+      return Number(key);
+    },
+    __spreadValues(
+      {},
+      ngDevMode
+        ? {
+            debugName: 'index',
+          }
+        : {}
+    )
+  );
+  fieldTreeOf = (p) => this.resolve(p);
+  stateOf = (p) => this.resolve(p)();
+  valueOf = (p) => {
+    const result = this.resolve(p)().value();
+    if (result instanceof AbstractControl) {
+      throw new Error(
+        `Tried to read an 'AbstractControl' value form a 'form()'. Did you mean to use 'compatForm()' instead?`
+      );
+    }
+    return result;
+  };
+};
+var FieldMetadataState = class {
+  node;
+  metadata = /* @__PURE__ */ new Map();
+  constructor(node) {
+    this.node = node;
+    untracked(() =>
+      runInInjectionContext(this.node.structure.injector, () => {
+        for (const [key, factory] of this.node.logicNode.logic.getMetadataFactoryEntries()) {
+          this.metadata.set(key, factory(this.node.context));
+        }
+      })
+    );
+  }
+  get(key) {
+    if (key instanceof MetadataKey) {
+      return this.metadata.get(key);
+    }
+    if (!this.metadata.has(key)) {
+      const logic = this.node.logicNode.logic.getAggregateMetadata(key);
+      const result = computed(
+        () => logic.compute(this.node.context),
+        __spreadValues(
+          {},
+          ngDevMode
+            ? {
+                debugName: 'result',
+              }
+            : {}
+        )
+      );
+      this.metadata.set(key, result);
+    }
+    return this.metadata.get(key);
+  }
+  has(key) {
+    if (key instanceof AggregateMetadataKey) {
+      return this.node.logicNode.logic.hasAggregateMetadata(key);
+    } else {
+      return this.metadata.has(key);
+    }
+  }
+};
+var FIELD_PROXY_HANDLER = {
+  get(getTgt, p, receiver) {
+    const tgt = getTgt();
+    const child = tgt.structure.getChild(p);
+    if (child !== void 0) {
+      return child.fieldProxy;
+    }
+    const value = untracked(tgt.value);
+    if (isArray(value)) {
+      if (p === 'length') {
+        return tgt.value().length;
+      }
+      if (p === Symbol.iterator) {
+        return Array.prototype[p];
+      }
+    }
+    if (isObject(value)) {
+      if (p === Symbol.iterator) {
+        return function* () {
+          for (const key in receiver) {
+            yield [key, receiver[key]];
+          }
+        };
+      }
+    }
+    return void 0;
+  },
+  getOwnPropertyDescriptor(getTgt, prop) {
+    const value = untracked(getTgt().value);
+    const desc = Reflect.getOwnPropertyDescriptor(value, prop);
+    if (desc && !desc.configurable) {
+      desc.configurable = true;
+    }
+    return desc;
+  },
+  ownKeys(getTgt) {
+    const value = untracked(getTgt().value);
+    return typeof value === 'object' && value !== null ? Reflect.ownKeys(value) : [];
+  },
+};
+function deepSignal(source, prop) {
+  const read = computed(() => source()[prop()]);
+  read[SIGNAL] = source[SIGNAL];
+  read.set = (value) => {
+    source.update((current) => valueForWrite(current, value, prop()));
+  };
+  read.update = (fn) => {
+    read.set(fn(untracked(read)));
+  };
+  read.asReadonly = () => read;
+  return read;
+}
+function valueForWrite(sourceValue, newPropValue, prop) {
+  if (isArray(sourceValue)) {
+    const newValue = [...sourceValue];
+    newValue[prop] = newPropValue;
+    return newValue;
+  } else {
+    return __spreadProps(__spreadValues({}, sourceValue), {
+      [prop]: newPropValue,
+    });
+  }
+}
+var FieldNodeStructure = class {
+  logic;
+  identitySymbol = Symbol();
+  _injector = void 0;
+  get injector() {
+    this._injector ??= Injector.create({
+      providers: [],
+      parent: this.fieldManager.injector,
+    });
+    return this._injector;
+  }
+  constructor(logic) {
+    this.logic = logic;
+  }
+  children() {
+    return this.childrenMap()?.values() ?? [];
+  }
+  getChild(key) {
+    const map = this.childrenMap();
+    const value = this.value();
+    if (!map || !isObject(value)) {
+      return void 0;
+    }
+    if (isArray(value)) {
+      const childValue = value[key];
+      if (isObject(childValue) && childValue.hasOwnProperty(this.identitySymbol)) {
+        key = childValue[this.identitySymbol];
+      }
+    }
+    return map.get(typeof key === 'number' ? key.toString() : key);
+  }
+  destroy() {
+    this.injector.destroy();
+  }
+};
+var RootFieldNodeStructure = class extends FieldNodeStructure {
+  node;
+  fieldManager;
+  value;
+  get parent() {
+    return void 0;
+  }
+  get root() {
+    return this.node;
+  }
+  get pathKeys() {
+    return ROOT_PATH_KEYS;
+  }
+  get keyInParent() {
+    return ROOT_KEY_IN_PARENT;
+  }
+  childrenMap;
+  constructor(node, pathNode, logic, fieldManager, value, adapter, createChildNode) {
+    super(logic);
+    this.node = node;
+    this.fieldManager = fieldManager;
+    this.value = value;
+    this.childrenMap = makeChildrenMapSignal(
+      node,
+      value,
+      this.identitySymbol,
+      pathNode,
+      logic,
+      adapter,
+      createChildNode
+    );
+  }
+};
+var ChildFieldNodeStructure = class extends FieldNodeStructure {
+  parent;
+  root;
+  pathKeys;
+  keyInParent;
+  value;
+  childrenMap;
+  get fieldManager() {
+    return this.root.structure.fieldManager;
+  }
+  constructor(node, pathNode, logic, parent, identityInParent, initialKeyInParent, adapter, createChildNode) {
+    super(logic);
+    this.parent = parent;
+    this.root = this.parent.structure.root;
+    this.pathKeys = computed(
+      () => [...parent.structure.pathKeys(), this.keyInParent()],
+      __spreadValues(
+        {},
+        ngDevMode
+          ? {
+              debugName: 'pathKeys',
+            }
+          : {}
+      )
+    );
+    if (identityInParent === void 0) {
+      const key = initialKeyInParent;
+      this.keyInParent = computed(
+        () => {
+          if (parent.structure.childrenMap()?.get(key) !== node) {
+            throw new Error(`RuntimeError: orphan field, looking for property '${key}' of ${getDebugName(parent)}`);
+          }
+          return key;
+        },
+        __spreadValues(
+          {},
+          ngDevMode
+            ? {
+                debugName: 'keyInParent',
+              }
+            : {}
+        )
+      );
+    } else {
+      let lastKnownKey = initialKeyInParent;
+      this.keyInParent = computed(
+        () => {
+          const parentValue = parent.structure.value();
+          if (!isArray(parentValue)) {
+            throw new Error(`RuntimeError: orphan field, expected ${getDebugName(parent)} to be an array`);
+          }
+          const data = parentValue[lastKnownKey];
+          if (
+            isObject(data) &&
+            data.hasOwnProperty(parent.structure.identitySymbol) &&
+            data[parent.structure.identitySymbol] === identityInParent
+          ) {
+            return lastKnownKey;
+          }
+          for (let i = 0; i < parentValue.length; i++) {
+            const data2 = parentValue[i];
+            if (
+              isObject(data2) &&
+              data2.hasOwnProperty(parent.structure.identitySymbol) &&
+              data2[parent.structure.identitySymbol] === identityInParent
+            ) {
+              return (lastKnownKey = i.toString());
+            }
+          }
+          throw new Error(`RuntimeError: orphan field, can't find element in array ${getDebugName(parent)}`);
+        },
+        __spreadValues(
+          {},
+          ngDevMode
+            ? {
+                debugName: 'keyInParent',
+              }
+            : {}
+        )
+      );
+    }
+    this.value = deepSignal(this.parent.structure.value, this.keyInParent);
+    this.childrenMap = makeChildrenMapSignal(
+      node,
+      this.value,
+      this.identitySymbol,
+      pathNode,
+      logic,
+      adapter,
+      createChildNode
+    );
+    this.fieldManager.structures.add(this);
+  }
+};
+var globalId = 0;
+var ROOT_PATH_KEYS = computed(
+  () => [],
+  __spreadValues(
+    {},
+    ngDevMode
+      ? {
+          debugName: 'ROOT_PATH_KEYS',
+        }
+      : {}
+  )
+);
+var ROOT_KEY_IN_PARENT = computed(
+  () => {
+    throw new Error(`RuntimeError: the top-level field in the form has no parent`);
+  },
+  __spreadValues(
+    {},
+    ngDevMode
+      ? {
+          debugName: 'ROOT_KEY_IN_PARENT',
+        }
+      : {}
+  )
+);
+function makeChildrenMapSignal(node, valueSignal, identitySymbol, pathNode, logic, adapter, createChildNode) {
+  return linkedSignal({
+    source: valueSignal,
+    computation: (value, previous) => {
+      let childrenMap = previous?.value;
+      if (!isObject(value)) {
+        return void 0;
+      }
+      const isValueArray = isArray(value);
+      if (childrenMap !== void 0) {
+        let oldKeys = void 0;
+        if (isValueArray) {
+          oldKeys = new Set(childrenMap.keys());
+          for (let i = 0; i < value.length; i++) {
+            const childValue = value[i];
+            if (isObject(childValue) && childValue.hasOwnProperty(identitySymbol)) {
+              oldKeys.delete(childValue[identitySymbol]);
+            } else {
+              oldKeys.delete(i.toString());
+            }
+          }
+          for (const key of oldKeys) {
+            childrenMap.delete(key);
+          }
+        } else {
+          for (let key of childrenMap.keys()) {
+            if (!value.hasOwnProperty(key)) {
+              childrenMap.delete(key);
+            }
+          }
+        }
+      }
+      for (let key of Object.keys(value)) {
+        let trackingId = void 0;
+        const childValue = value[key];
+        if (childValue === void 0) {
+          childrenMap?.delete(key);
+          continue;
+        }
+        if (isValueArray && isObject(childValue) && !isArray(childValue)) {
+          trackingId = childValue[identitySymbol] ??= Symbol(ngDevMode ? `id:${globalId++}` : '');
+        }
+        const identity = trackingId ?? key;
+        if (childrenMap?.has(identity)) {
+          continue;
+        }
+        let childPath;
+        let childLogic;
+        if (isValueArray) {
+          childPath = pathNode.getChild(DYNAMIC);
+          childLogic = logic.getChild(DYNAMIC);
+        } else {
+          childPath = pathNode.getChild(key);
+          childLogic = logic.getChild(key);
+        }
+        childrenMap ??= /* @__PURE__ */ new Map();
+        childrenMap.set(
+          identity,
+          createChildNode({
+            kind: 'child',
+            parent: node,
+            pathNode: childPath,
+            logic: childLogic,
+            initialKeyInParent: key,
+            identityInParent: trackingId,
+            fieldAdapter: adapter,
+          })
+        );
+      }
+      return childrenMap;
+    },
+    equal: () => false,
+  });
+}
+function getDebugName(node) {
+  return `<root>.${node.structure.pathKeys().join('.')}`;
+}
+var FieldSubmitState = class {
+  node;
+  selfSubmitting = signal(
+    false,
+    __spreadValues(
+      {},
+      ngDevMode
+        ? {
+            debugName: 'selfSubmitting',
+          }
+        : {}
+    )
+  );
+  serverErrors;
+  constructor(node) {
+    this.node = node;
+    this.serverErrors = linkedSignal(
+      __spreadProps(
+        __spreadValues(
+          {},
+          ngDevMode
+            ? {
+                debugName: 'serverErrors',
+              }
+            : {}
+        ),
+        {
+          source: this.node.structure.value,
+          computation: () => [],
+        }
+      )
+    );
+  }
+  submitting = computed(
+    () => {
+      return this.selfSubmitting() || (this.node.structure.parent?.submitting() ?? false);
+    },
+    __spreadValues(
+      {},
+      ngDevMode
+        ? {
+            debugName: 'submitting',
+          }
+        : {}
+    )
+  );
+};
+var FieldNode = class _FieldNode {
+  structure;
+  validationState;
+  metadataState;
+  nodeState;
+  submitState;
+  fieldAdapter;
+  _context = void 0;
+  get context() {
+    return (this._context ??= new FieldNodeContext(this));
+  }
+  fieldProxy = new Proxy(() => this, FIELD_PROXY_HANDLER);
+  constructor(options) {
+    this.fieldAdapter = options.fieldAdapter;
+    this.structure = this.fieldAdapter.createStructure(this, options);
+    this.validationState = this.fieldAdapter.createValidationState(this, options);
+    this.nodeState = this.fieldAdapter.createNodeState(this, options);
+    this.metadataState = new FieldMetadataState(this);
+    this.submitState = new FieldSubmitState(this);
+  }
+  pendingSync = linkedSignal(
+    __spreadProps(
+      __spreadValues(
+        {},
+        ngDevMode
+          ? {
+              debugName: 'pendingSync',
+            }
+          : {}
+      ),
+      {
+        source: () => this.value(),
+        computation: (_source, previous) => {
+          previous?.value?.abort();
+          return void 0;
+        },
+      }
+    )
+  );
+  get logicNode() {
+    return this.structure.logic;
+  }
+  get value() {
+    return this.structure.value;
+  }
+  _controlValue = linkedSignal(
+    () => this.value(),
+    __spreadValues(
+      {},
+      ngDevMode
+        ? {
+            debugName: '_controlValue',
+          }
+        : {}
+    )
+  );
+  get controlValue() {
+    return this._controlValue.asReadonly();
+  }
+  get keyInParent() {
+    return this.structure.keyInParent;
+  }
+  get errors() {
+    return this.validationState.errors;
+  }
+  get errorSummary() {
+    return this.validationState.errorSummary;
+  }
+  get pending() {
+    return this.validationState.pending;
+  }
+  get valid() {
+    return this.validationState.valid;
+  }
+  get invalid() {
+    return this.validationState.invalid;
+  }
+  get dirty() {
+    return this.nodeState.dirty;
+  }
+  get touched() {
+    return this.nodeState.touched;
+  }
+  get disabled() {
+    return this.nodeState.disabled;
+  }
+  get disabledReasons() {
+    return this.nodeState.disabledReasons;
+  }
+  get hidden() {
+    return this.nodeState.hidden;
+  }
+  get readonly() {
+    return this.nodeState.readonly;
+  }
+  get fieldBindings() {
+    return this.nodeState.fieldBindings;
+  }
+  get submitting() {
+    return this.submitState.submitting;
+  }
+  get name() {
+    return this.nodeState.name;
+  }
+  metadataOrUndefined(key) {
+    return this.hasMetadata(key) ? this.metadata(key) : void 0;
+  }
+  get max() {
+    return this.metadataOrUndefined(MAX);
+  }
+  get maxLength() {
+    return this.metadataOrUndefined(MAX_LENGTH);
+  }
+  get min() {
+    return this.metadataOrUndefined(MIN);
+  }
+  get minLength() {
+    return this.metadataOrUndefined(MIN_LENGTH);
+  }
+  get pattern() {
+    return this.metadataOrUndefined(PATTERN) ?? EMPTY;
+  }
+  get required() {
+    return this.metadataOrUndefined(REQUIRED) ?? FALSE;
+  }
+  metadata(key) {
+    return this.metadataState.get(key);
+  }
+  hasMetadata(key) {
+    return this.metadataState.has(key);
+  }
+  markAsTouched() {
+    this.nodeState.markAsTouched();
+    this.pendingSync()?.abort();
+    this.sync();
+  }
+  markAsDirty() {
+    this.nodeState.markAsDirty();
+  }
+  reset(value) {
+    untracked(() => this._reset(value));
+  }
+  _reset(value) {
+    if (value) {
+      this.value.set(value);
+    }
+    this.nodeState.markAsUntouched();
+    this.nodeState.markAsPristine();
+    for (const child of this.structure.children()) {
+      child._reset();
+    }
+  }
+  setControlValue(newValue) {
+    this._controlValue.set(newValue);
+    this.markAsDirty();
+    this.debounceSync();
+  }
+  sync() {
+    this.value.set(this.controlValue());
+  }
+  async debounceSync() {
+    this.pendingSync()?.abort();
+    const debouncer = this.nodeState.debouncer();
+    if (debouncer) {
+      const controller = new AbortController();
+      const promise = debouncer(controller.signal);
+      if (promise) {
+        this.pendingSync.set(controller);
+        await promise;
+        if (controller.signal.aborted) {
+          return;
+        }
+      }
+    }
+    this.sync();
+  }
+  static newRoot(fieldManager, value, pathNode, adapter) {
+    return adapter.newRoot(fieldManager, value, pathNode, adapter);
+  }
+  static newChild(options) {
+    return options.fieldAdapter.newChild(options);
+  }
+  createStructure(options) {
+    return options.kind === 'root'
+      ? new RootFieldNodeStructure(
+          this,
+          options.pathNode,
+          options.logic,
+          options.fieldManager,
+          options.value,
+          options.fieldAdapter,
+          _FieldNode.newChild
+        )
+      : new ChildFieldNodeStructure(
+          this,
+          options.pathNode,
+          options.logic,
+          options.parent,
+          options.identityInParent,
+          options.initialKeyInParent,
+          options.fieldAdapter,
+          _FieldNode.newChild
+        );
+  }
+};
+var EMPTY = computed(
+  () => [],
+  __spreadValues(
+    {},
+    ngDevMode
+      ? {
+          debugName: 'EMPTY',
+        }
+      : {}
+  )
+);
+var FALSE = computed(
+  () => false,
+  __spreadValues(
+    {},
+    ngDevMode
+      ? {
+          debugName: 'FALSE',
+        }
+      : {}
+  )
+);
+var FieldNodeState = class {
+  node;
+  selfTouched = signal(
+    false,
+    __spreadValues(
+      {},
+      ngDevMode
+        ? {
+            debugName: 'selfTouched',
+          }
+        : {}
+    )
+  );
+  selfDirty = signal(
+    false,
+    __spreadValues(
+      {},
+      ngDevMode
+        ? {
+            debugName: 'selfDirty',
+          }
+        : {}
+    )
+  );
+  markAsTouched() {
+    this.selfTouched.set(true);
+  }
+  markAsDirty() {
+    this.selfDirty.set(true);
+  }
+  markAsPristine() {
+    this.selfDirty.set(false);
+  }
+  markAsUntouched() {
+    this.selfTouched.set(false);
+  }
+  fieldBindings = signal(
+    [],
+    __spreadValues(
+      {},
+      ngDevMode
+        ? {
+            debugName: 'fieldBindings',
+          }
+        : {}
+    )
+  );
+  constructor(node) {
+    this.node = node;
+  }
+  dirty = computed(
+    () => {
+      const selfDirtyValue = this.selfDirty() && !this.isNonInteractive();
+      return reduceChildren(
+        this.node,
+        selfDirtyValue,
+        (child, value) => value || child.nodeState.dirty(),
+        shortCircuitTrue
+      );
+    },
+    __spreadValues(
+      {},
+      ngDevMode
+        ? {
+            debugName: 'dirty',
+          }
+        : {}
+    )
+  );
+  touched = computed(
+    () => {
+      const selfTouchedValue = this.selfTouched() && !this.isNonInteractive();
+      return reduceChildren(
+        this.node,
+        selfTouchedValue,
+        (child, value) => value || child.nodeState.touched(),
+        shortCircuitTrue
+      );
+    },
+    __spreadValues(
+      {},
+      ngDevMode
+        ? {
+            debugName: 'touched',
+          }
+        : {}
+    )
+  );
+  disabledReasons = computed(
+    () => [
+      ...(this.node.structure.parent?.nodeState.disabledReasons() ?? []),
+      ...this.node.logicNode.logic.disabledReasons.compute(this.node.context),
+    ],
+    __spreadValues(
+      {},
+      ngDevMode
+        ? {
+            debugName: 'disabledReasons',
+          }
+        : {}
+    )
+  );
+  disabled = computed(
+    () => !!this.disabledReasons().length,
+    __spreadValues(
+      {},
+      ngDevMode
+        ? {
+            debugName: 'disabled',
+          }
+        : {}
+    )
+  );
+  readonly = computed(
+    () =>
+      (this.node.structure.parent?.nodeState.readonly() ||
+        this.node.logicNode.logic.readonly.compute(this.node.context)) ??
+      false,
+    __spreadValues(
+      {},
+      ngDevMode
+        ? {
+            debugName: 'readonly',
+          }
+        : {}
+    )
+  );
+  hidden = computed(
+    () =>
+      (this.node.structure.parent?.nodeState.hidden() || this.node.logicNode.logic.hidden.compute(this.node.context)) ??
+      false,
+    __spreadValues(
+      {},
+      ngDevMode
+        ? {
+            debugName: 'hidden',
+          }
+        : {}
+    )
+  );
+  name = computed(
+    () => {
+      const parent = this.node.structure.parent;
+      if (!parent) {
+        return this.node.structure.fieldManager.rootName;
+      }
+      return `${parent.name()}.${this.node.structure.keyInParent()}`;
+    },
+    __spreadValues(
+      {},
+      ngDevMode
+        ? {
+            debugName: 'name',
+          }
+        : {}
+    )
+  );
+  debouncer = computed(
+    () => {
+      if (this.node.logicNode.logic.hasAggregateMetadata(DEBOUNCER)) {
+        const debouncerLogic = this.node.logicNode.logic.getAggregateMetadata(DEBOUNCER);
+        const debouncer = debouncerLogic.compute(this.node.context);
+        if (debouncer) {
+          return (signal2) => debouncer(this.node.context, signal2);
+        }
+      }
+      return this.node.structure.parent?.nodeState.debouncer?.();
+    },
+    __spreadValues(
+      {},
+      ngDevMode
+        ? {
+            debugName: 'debouncer',
+          }
+        : {}
+    )
+  );
+  isNonInteractive = computed(
+    () => this.hidden() || this.disabled() || this.readonly(),
+    __spreadValues(
+      {},
+      ngDevMode
+        ? {
+            debugName: 'isNonInteractive',
+          }
+        : {}
+    )
+  );
+};
+var BasicFieldAdapter = class {
+  newRoot(fieldManager, value, pathNode, adapter) {
+    return new FieldNode({
+      kind: 'root',
+      fieldManager,
+      value,
+      pathNode,
+      logic: pathNode.builder.build(),
+      fieldAdapter: adapter,
+    });
+  }
+  newChild(options) {
+    return new FieldNode(options);
+  }
+  createNodeState(node) {
+    return new FieldNodeState(node);
+  }
+  createValidationState(node) {
+    return new FieldValidationState(node);
+  }
+  createStructure(node, options) {
+    return node.createStructure(options);
+  }
+};
+var FormFieldManager = class {
+  injector;
+  rootName;
+  constructor(injector, rootName) {
+    this.injector = injector;
+    this.rootName = rootName ?? `${this.injector.get(APP_ID)}.form${nextFormId++}`;
+  }
+  structures = /* @__PURE__ */ new Set();
+  createFieldManagementEffect(root) {
+    effect(
+      () => {
+        const liveStructures = /* @__PURE__ */ new Set();
+        this.markStructuresLive(root, liveStructures);
+        for (const structure of this.structures) {
+          if (!liveStructures.has(structure)) {
+            this.structures.delete(structure);
+            untracked(() => structure.destroy());
+          }
+        }
+      },
+      {
+        injector: this.injector,
+      }
+    );
+  }
+  markStructuresLive(structure, liveStructures) {
+    liveStructures.add(structure);
+    for (const child of structure.children()) {
+      this.markStructuresLive(child.structure, liveStructures);
+    }
+  }
+};
+var nextFormId = 0;
+function normalizeFormArgs(args) {
+  let model;
+  let schema2;
+  let options;
+  if (args.length === 3) {
+    [model, schema2, options] = args;
+  } else if (args.length === 2) {
+    if (isSchemaOrSchemaFn(args[1])) {
+      [model, schema2] = args;
+    } else {
+      [model, options] = args;
+    }
+  } else {
+    [model] = args;
+  }
+  return [model, schema2, options];
+}
+function form(...args) {
+  const [model, schema2, options] = normalizeFormArgs(args);
+  const injector = options?.injector ?? inject(Injector);
+  const pathNode = runInInjectionContext(injector, () => SchemaImpl.rootCompile(schema2));
+  const fieldManager = new FormFieldManager(injector, options?.name);
+  const adapter = options?.adapter ?? new BasicFieldAdapter();
+  const fieldRoot = FieldNode.newRoot(fieldManager, model, pathNode, adapter);
+  fieldManager.createFieldManagementEffect(fieldRoot.structure);
+  return fieldRoot.fieldProxy;
+}
+function applyEach(path, schema2) {
+  assertPathIsCurrent(path);
+  const elementPath = FieldPathNode.unwrapFieldPath(path).getChild(DYNAMIC).fieldPathProxy;
+  apply(elementPath, schema2);
+}
+function apply(path, schema2) {
+  assertPathIsCurrent(path);
+  const pathNode = FieldPathNode.unwrapFieldPath(path);
+  pathNode.mergeIn(SchemaImpl.create(schema2));
+}
+function applyWhen(path, logic, schema2) {
+  assertPathIsCurrent(path);
+  const pathNode = FieldPathNode.unwrapFieldPath(path);
+  pathNode.mergeIn(SchemaImpl.create(schema2), {
+    fn: logic,
+    path,
+  });
+}
+function applyWhenValue(path, predicate, schema2) {
+  applyWhen(path, ({ value }) => predicate(value()), schema2);
+}
+async function submit(form2, action) {
+  const node = form2();
+  markAllAsTouched(node);
+  if (node.invalid()) {
+    return;
+  }
+  node.submitState.selfSubmitting.set(true);
+  try {
+    const errors = await action(form2);
+    errors && setServerErrors(node, errors);
+  } finally {
+    node.submitState.selfSubmitting.set(false);
+  }
+}
+function setServerErrors(submittedField, errors) {
+  if (!isArray(errors)) {
+    errors = [errors];
+  }
+  const errorsByField = /* @__PURE__ */ new Map();
+  for (const error of errors) {
+    const errorWithField = addDefaultField(error, submittedField.fieldProxy);
+    const field = errorWithField.field();
+    let fieldErrors = errorsByField.get(field);
+    if (!fieldErrors) {
+      fieldErrors = [];
+      errorsByField.set(field, fieldErrors);
+    }
+    fieldErrors.push(errorWithField);
+  }
+  for (const [field, fieldErrors] of errorsByField) {
+    field.submitState.serverErrors.set(fieldErrors);
+  }
+}
+function schema(fn) {
+  return SchemaImpl.create(fn);
+}
+function markAllAsTouched(node) {
+  node.markAsTouched();
+  for (const child of node.structure.children()) {
+    markAllAsTouched(child);
+  }
+}
+
+// node_modules/@angular/forms/fesm2022/signals.mjs
+function requiredError(options) {
+  return new RequiredValidationError(options);
+}
+function minError(min2, options) {
+  return new MinValidationError(min2, options);
+}
+function maxError(max2, options) {
+  return new MaxValidationError(max2, options);
+}
+function minLengthError(minLength2, options) {
+  return new MinLengthValidationError(minLength2, options);
+}
+function maxLengthError(maxLength2, options) {
+  return new MaxLengthValidationError(maxLength2, options);
+}
+function patternError(pattern2, options) {
+  return new PatternValidationError(pattern2, options);
+}
+function emailError(options) {
+  return new EmailValidationError(options);
+}
+function standardSchemaError(issue, options) {
+  return new StandardSchemaValidationError(issue, options);
+}
+function customError(obj) {
+  return new CustomValidationError(obj);
+}
+var CustomValidationError = class {
+  __brand = void 0;
+  kind = '';
+  field;
+  message;
+  constructor(options) {
+    if (options) {
+      Object.assign(this, options);
+    }
+  }
+};
+var _NgValidationError = class {
+  __brand = void 0;
+  kind = '';
+  field;
+  message;
+  constructor(options) {
+    if (options) {
+      Object.assign(this, options);
+    }
+  }
+};
+var RequiredValidationError = class extends _NgValidationError {
+  kind = 'required';
+};
+var MinValidationError = class extends _NgValidationError {
+  min;
+  kind = 'min';
+  constructor(min2, options) {
+    super(options);
+    this.min = min2;
+  }
+};
+var MaxValidationError = class extends _NgValidationError {
+  max;
+  kind = 'max';
+  constructor(max2, options) {
+    super(options);
+    this.max = max2;
+  }
+};
+var MinLengthValidationError = class extends _NgValidationError {
+  minLength;
+  kind = 'minLength';
+  constructor(minLength2, options) {
+    super(options);
+    this.minLength = minLength2;
+  }
+};
+var MaxLengthValidationError = class extends _NgValidationError {
+  maxLength;
+  kind = 'maxLength';
+  constructor(maxLength2, options) {
+    super(options);
+    this.maxLength = maxLength2;
+  }
+};
+var PatternValidationError = class extends _NgValidationError {
+  pattern;
+  kind = 'pattern';
+  constructor(pattern2, options) {
+    super(options);
+    this.pattern = pattern2;
+  }
+};
+var EmailValidationError = class extends _NgValidationError {
+  kind = 'email';
+};
+var StandardSchemaValidationError = class extends _NgValidationError {
+  issue;
+  kind = 'standardSchema';
+  constructor(issue, options) {
+    super(options);
+    this.issue = issue;
+  }
+};
+var NgValidationError = _NgValidationError;
+function getLengthOrSize(value) {
+  const v = value;
+  return typeof v.length === 'number' ? v.length : v.size;
+}
+function getOption(opt, ctx) {
+  return opt instanceof Function ? opt(ctx) : opt;
+}
+function isEmpty(value) {
+  if (typeof value === 'number') {
+    return isNaN(value);
+  }
+  return value === '' || value === false || value == null;
+}
+function isPlainError(error) {
+  return (
+    typeof error === 'object' &&
+    (Object.getPrototypeOf(error) === Object.prototype || Object.getPrototypeOf(error) === null)
+  );
+}
+function ensureCustomValidationError(error) {
+  if (isPlainError(error)) {
+    return customError(error);
+  }
+  return error;
+}
+function ensureCustomValidationResult(result) {
+  if (result === null || result === void 0) {
+    return result;
+  }
+  if (isArray(result)) {
+    return result.map(ensureCustomValidationError);
+  }
+  return ensureCustomValidationError(result);
+}
+function disabled(path, logic) {
+  assertPathIsCurrent(path);
+  const pathNode = FieldPathNode.unwrapFieldPath(path);
+  pathNode.builder.addDisabledReasonRule((ctx) => {
+    let result = true;
+    if (typeof logic === 'string') {
+      result = logic;
+    } else if (logic) {
+      result = logic(ctx);
+    }
+    if (typeof result === 'string') {
+      return {
+        field: ctx.field,
+        message: result,
+      };
+    }
+    return result
+      ? {
+          field: ctx.field,
+        }
+      : void 0;
+  });
+}
+function readonly(path, logic = () => true) {
+  assertPathIsCurrent(path);
+  const pathNode = FieldPathNode.unwrapFieldPath(path);
+  pathNode.builder.addReadonlyRule(logic);
+}
+function hidden(path, logic) {
+  assertPathIsCurrent(path);
+  const pathNode = FieldPathNode.unwrapFieldPath(path);
+  pathNode.builder.addHiddenRule(logic);
+}
+function validate(path, logic) {
+  assertPathIsCurrent(path);
+  const pathNode = FieldPathNode.unwrapFieldPath(path);
+  pathNode.builder.addSyncErrorRule((ctx) => {
+    return ensureCustomValidationResult(addDefaultField(logic(ctx), ctx.field));
+  });
+}
+function validateTree(path, logic) {
+  assertPathIsCurrent(path);
+  const pathNode = FieldPathNode.unwrapFieldPath(path);
+  pathNode.builder.addSyncTreeErrorRule((ctx) => addDefaultField(logic(ctx), ctx.field));
+}
+function aggregateMetadata(path, key, logic) {
+  assertPathIsCurrent(path);
+  const pathNode = FieldPathNode.unwrapFieldPath(path);
+  pathNode.builder.addAggregateMetadataRule(key, logic);
+}
+function metadata(path, ...rest) {
+  assertPathIsCurrent(path);
+  let key;
+  let factory;
+  if (rest.length === 2) {
+    [key, factory] = rest;
+  } else {
+    [factory] = rest;
+  }
+  key ??= createMetadataKey();
+  const pathNode = FieldPathNode.unwrapFieldPath(path);
+  pathNode.builder.addMetadataFactory(key, factory);
+  return key;
+}
+function validateAsync(path, opts) {
+  assertPathIsCurrent(path);
+  const pathNode = FieldPathNode.unwrapFieldPath(path);
+  const RESOURCE = metadata(path, (ctx) => {
+    const params = computed(
+      () => {
+        const node = ctx.stateOf(path);
+        const validationState = node.validationState;
+        if (validationState.shouldSkipValidation() || !validationState.syncValid()) {
+          return void 0;
+        }
+        return opts.params(ctx);
+      },
+      __spreadValues(
+        {},
+        ngDevMode
+          ? {
+              debugName: 'params',
+            }
+          : {}
+      )
+    );
+    return opts.factory(params);
+  });
+  pathNode.builder.addAsyncErrorRule((ctx) => {
+    const res = ctx.state.metadata(RESOURCE);
+    let errors;
+    switch (res.status()) {
+      case 'idle':
+        return void 0;
+      case 'loading':
+      case 'reloading':
+        return 'pending';
+      case 'resolved':
+      case 'local':
+        if (!res.hasValue()) {
+          return void 0;
+        }
+        errors = opts.onSuccess(res.value(), ctx);
+        return addDefaultField(errors, ctx.field);
+      case 'error':
+        errors = opts.onError(res.error(), ctx);
+        return addDefaultField(errors, ctx.field);
+    }
+  });
+}
+function validateHttp(path, opts) {
+  validateAsync(path, {
+    params: opts.request,
+    factory: (request) => httpResource(request, opts.options),
+    onSuccess: opts.onSuccess,
+    onError: opts.onError,
+  });
+}
+function debounce(path, durationOrDebouncer) {
+  assertPathIsCurrent(path);
+  const pathNode = FieldPathNode.unwrapFieldPath(path);
+  const debouncer =
+    typeof durationOrDebouncer === 'function'
+      ? durationOrDebouncer
+      : durationOrDebouncer > 0
+        ? debounceForDuration(durationOrDebouncer)
+        : immediate;
+  pathNode.builder.addAggregateMetadataRule(DEBOUNCER, () => debouncer);
+}
+function debounceForDuration(durationInMilliseconds) {
+  return (_context, abortSignal) => {
+    return new Promise((resolve) => {
+      const timeoutId = setTimeout(resolve, durationInMilliseconds);
+      abortSignal.addEventListener('abort', () => clearTimeout(timeoutId));
+    });
+  };
+}
+function immediate() {}
+var SIGNAL_FORMS_CONFIG = new InjectionToken(
+  typeof ngDevMode !== 'undefined' && ngDevMode ? 'SIGNAL_FORMS_CONFIG' : ''
+);
+function provideSignalFormsConfig(config) {
+  return [
+    {
+      provide: SIGNAL_FORMS_CONFIG,
+      useValue: config,
+    },
+  ];
+}
+var InteropNgControl = class {
+  field;
+  constructor(field) {
+    this.field = field;
+  }
+  control = this;
+  get value() {
+    return this.field().value();
+  }
+  get valid() {
+    return this.field().valid();
+  }
+  get invalid() {
+    return this.field().invalid();
+  }
+  get pending() {
+    return this.field().pending();
+  }
+  get disabled() {
+    return this.field().disabled();
+  }
+  get enabled() {
+    return !this.field().disabled();
+  }
+  get errors() {
+    const errors = this.field().errors();
+    if (errors.length === 0) {
+      return null;
+    }
+    const errObj = {};
+    for (const error of errors) {
+      errObj[error.kind] = error;
+    }
+    return errObj;
+  }
+  get pristine() {
+    return !this.field().dirty();
+  }
+  get dirty() {
+    return this.field().dirty();
+  }
+  get touched() {
+    return this.field().touched();
+  }
+  get untouched() {
+    return !this.field().touched();
+  }
+  get status() {
+    if (this.field().disabled()) {
+      return 'DISABLED';
+    }
+    if (this.field().valid()) {
+      return 'VALID';
+    }
+    if (this.field().invalid()) {
+      return 'INVALID';
+    }
+    if (this.field().pending()) {
+      return 'PENDING';
+    }
+    throw Error('AssertionError: unknown form control status');
+  }
+  valueAccessor = null;
+  hasValidator(validator) {
+    if (validator === Validators.required) {
+      return this.field().metadata(REQUIRED)();
+    }
+    return false;
+  }
+  updateValueAndValidity() {}
+};
+var FIELD = new InjectionToken(typeof ngDevMode !== void 0 && ngDevMode ? 'FIELD' : '');
+var Field = class _Field {
+  injector = inject(Injector);
+  config = inject(SIGNAL_FORMS_CONFIG, {
+    optional: true,
+  });
+  classes = Object.entries(this.config?.classes ?? {}).map(([className, computation]) => [
+    className,
+    computed(() => computation(this.state())),
+  ]);
+  field = input.required(
+    __spreadValues(
+      {},
+      ngDevMode
+        ? {
+            debugName: 'field',
+          }
+        : {}
+    )
+  );
+  state = computed(
+    () => this.field()(),
+    __spreadValues(
+      {},
+      ngDevMode
+        ? {
+            debugName: 'state',
+          }
+        : {}
+    )
+  );
+  [ɵCONTROL] = void 0;
+  controlValueAccessors = inject(NG_VALUE_ACCESSOR, {
+    optional: true,
+    self: true,
+  });
+  interopNgControl;
+  get ɵinteropControl() {
+    return this.controlValueAccessors?.[0] ?? this.interopNgControl?.valueAccessor ?? void 0;
+  }
+  getOrCreateNgControl() {
+    return (this.interopNgControl ??= new InteropNgControl(this.state));
+  }
+  ɵregister() {
+    effect(
+      (onCleanup) => {
+        const fieldNode = this.state();
+        fieldNode.nodeState.fieldBindings.update((controls) => [...controls, this]);
+        onCleanup(() => {
+          fieldNode.nodeState.fieldBindings.update((controls) => controls.filter((c) => c !== this));
+        });
+      },
+      {
+        injector: this.injector,
+      }
+    );
+  }
+  static ɵfac = function Field_Factory(__ngFactoryType__) {
+    return new (__ngFactoryType__ || _Field)();
+  };
+  static ɵdir = ɵɵdefineDirective({
+    type: _Field,
+    selectors: [['', 'field', '']],
+    inputs: {
+      field: [1, 'field'],
+    },
+    features: [
+      ɵɵProvidersFeature([
+        {
+          provide: FIELD,
+          useExisting: _Field,
+        },
+        {
+          provide: NgControl,
+          useFactory: () => inject(_Field).getOrCreateNgControl(),
+        },
+      ]),
+    ],
+  });
+};
+(() => {
+  (typeof ngDevMode === 'undefined' || ngDevMode) &&
+    setClassMetadata(
+      Field,
+      [
+        {
+          type: Directive,
+          args: [
+            {
+              selector: '[field]',
+              providers: [
+                {
+                  provide: FIELD,
+                  useExisting: Field,
+                },
+                {
+                  provide: NgControl,
+                  useFactory: () => inject(Field).getOrCreateNgControl(),
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      null,
+      {
+        field: [
+          {
+            type: Input,
+            args: [
+              {
+                isSignal: true,
+                alias: 'field',
+                required: true,
+              },
+            ],
+          },
+        ],
+      }
+    );
+})();
+var EMAIL_REGEXP =
+  /^(?=.{1,254}$)(?=.{1,64}@)[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+function email(path, config) {
+  validate(path, (ctx) => {
+    if (isEmpty(ctx.value())) {
+      return void 0;
+    }
+    if (!EMAIL_REGEXP.test(ctx.value())) {
+      if (config?.error) {
+        return getOption(config.error, ctx);
+      } else {
+        return emailError({
+          message: getOption(config?.message, ctx),
+        });
+      }
+    }
+    return void 0;
+  });
+}
+function max(path, maxValue, config) {
+  const MAX_MEMO = metadata(path, (ctx) => computed(() => (typeof maxValue === 'number' ? maxValue : maxValue(ctx))));
+  aggregateMetadata(path, MAX, ({ state }) => state.metadata(MAX_MEMO)());
+  validate(path, (ctx) => {
+    if (isEmpty(ctx.value())) {
+      return void 0;
+    }
+    const max2 = ctx.state.metadata(MAX_MEMO)();
+    if (max2 === void 0 || Number.isNaN(max2)) {
+      return void 0;
+    }
+    const value = ctx.value();
+    const numValue = !value && value !== 0 ? NaN : Number(value);
+    if (numValue > max2) {
+      if (config?.error) {
+        return getOption(config.error, ctx);
+      } else {
+        return maxError(max2, {
+          message: getOption(config?.message, ctx),
+        });
+      }
+    }
+    return void 0;
+  });
+}
+function maxLength(path, maxLength2, config) {
+  const MAX_LENGTH_MEMO = metadata(path, (ctx) =>
+    computed(() => (typeof maxLength2 === 'number' ? maxLength2 : maxLength2(ctx)))
+  );
+  aggregateMetadata(path, MAX_LENGTH, ({ state }) => state.metadata(MAX_LENGTH_MEMO)());
+  validate(path, (ctx) => {
+    if (isEmpty(ctx.value())) {
+      return void 0;
+    }
+    const maxLength3 = ctx.state.metadata(MAX_LENGTH_MEMO)();
+    if (maxLength3 === void 0) {
+      return void 0;
+    }
+    if (getLengthOrSize(ctx.value()) > maxLength3) {
+      if (config?.error) {
+        return getOption(config.error, ctx);
+      } else {
+        return maxLengthError(maxLength3, {
+          message: getOption(config?.message, ctx),
+        });
+      }
+    }
+    return void 0;
+  });
+}
+function min(path, minValue, config) {
+  const MIN_MEMO = metadata(path, (ctx) => computed(() => (typeof minValue === 'number' ? minValue : minValue(ctx))));
+  aggregateMetadata(path, MIN, ({ state }) => state.metadata(MIN_MEMO)());
+  validate(path, (ctx) => {
+    if (isEmpty(ctx.value())) {
+      return void 0;
+    }
+    const min2 = ctx.state.metadata(MIN_MEMO)();
+    if (min2 === void 0 || Number.isNaN(min2)) {
+      return void 0;
+    }
+    const value = ctx.value();
+    const numValue = !value && value !== 0 ? NaN : Number(value);
+    if (numValue < min2) {
+      if (config?.error) {
+        return getOption(config.error, ctx);
+      } else {
+        return minError(min2, {
+          message: getOption(config?.message, ctx),
+        });
+      }
+    }
+    return void 0;
+  });
+}
+function minLength(path, minLength2, config) {
+  const MIN_LENGTH_MEMO = metadata(path, (ctx) =>
+    computed(() => (typeof minLength2 === 'number' ? minLength2 : minLength2(ctx)))
+  );
+  aggregateMetadata(path, MIN_LENGTH, ({ state }) => state.metadata(MIN_LENGTH_MEMO)());
+  validate(path, (ctx) => {
+    if (isEmpty(ctx.value())) {
+      return void 0;
+    }
+    const minLength3 = ctx.state.metadata(MIN_LENGTH_MEMO)();
+    if (minLength3 === void 0) {
+      return void 0;
+    }
+    if (getLengthOrSize(ctx.value()) < minLength3) {
+      if (config?.error) {
+        return getOption(config.error, ctx);
+      } else {
+        return minLengthError(minLength3, {
+          message: getOption(config?.message, ctx),
+        });
+      }
+    }
+    return void 0;
+  });
+}
+function pattern(path, pattern2, config) {
+  const PATTERN_MEMO = metadata(path, (ctx) => computed(() => (pattern2 instanceof RegExp ? pattern2 : pattern2(ctx))));
+  aggregateMetadata(path, PATTERN, ({ state }) => state.metadata(PATTERN_MEMO)());
+  validate(path, (ctx) => {
+    if (isEmpty(ctx.value())) {
+      return void 0;
+    }
+    const pattern3 = ctx.state.metadata(PATTERN_MEMO)();
+    if (pattern3 === void 0) {
+      return void 0;
+    }
+    if (!pattern3.test(ctx.value())) {
+      if (config?.error) {
+        return getOption(config.error, ctx);
+      } else {
+        return patternError(pattern3, {
+          message: getOption(config?.message, ctx),
+        });
+      }
+    }
+    return void 0;
+  });
+}
+function required(path, config) {
+  const REQUIRED_MEMO = metadata(path, (ctx) => computed(() => (config?.when ? config.when(ctx) : true)));
+  aggregateMetadata(path, REQUIRED, ({ state }) => state.metadata(REQUIRED_MEMO)());
+  validate(path, (ctx) => {
+    if (ctx.state.metadata(REQUIRED_MEMO)() && isEmpty(ctx.value())) {
+      if (config?.error) {
+        return getOption(config.error, ctx);
+      } else {
+        return requiredError({
+          message: getOption(config?.message, ctx),
+        });
+      }
+    }
+    return void 0;
+  });
+}
+function validateStandardSchema(path, schema2) {
+  const VALIDATOR_MEMO = metadata(path, ({ value }) => {
+    return computed(() => schema2['~standard'].validate(value()));
+  });
+  validateTree(path, ({ state, fieldTreeOf }) => {
+    const result = state.metadata(VALIDATOR_MEMO)();
+    if (isPromise(result)) {
+      return [];
+    }
+    return result.issues?.map((issue) => standardIssueToFormTreeError(fieldTreeOf(path), issue)) ?? [];
+  });
+  validateAsync(path, {
+    params: ({ state }) => {
+      const result = state.metadata(VALIDATOR_MEMO)();
+      return isPromise(result) ? result : void 0;
+    },
+    factory: (params) => {
+      return resource({
+        params,
+        loader: async ({ params: params2 }) => (await params2)?.issues ?? [],
+      });
+    },
+    onSuccess: (issues, { fieldTreeOf }) => {
+      return issues.map((issue) => standardIssueToFormTreeError(fieldTreeOf(path), issue));
+    },
+    onError: () => {},
+  });
+}
+function standardIssueToFormTreeError(field, issue) {
+  let target = field;
+  for (const pathPart of issue.path ?? []) {
+    const pathKey = typeof pathPart === 'object' ? pathPart.key : pathPart;
+    target = target[pathKey];
+  }
+  return addDefaultField(
+    standardSchemaError(issue, {
+      message: issue.message,
+    }),
+    target
+  );
+}
+export {
+  AggregateMetadataKey,
+  CustomValidationError,
+  EmailValidationError,
+  FIELD,
+  Field,
+  MAX,
+  MAX_LENGTH,
+  MIN,
+  MIN_LENGTH,
+  MaxLengthValidationError,
+  MaxValidationError,
+  MetadataKey,
+  MinLengthValidationError,
+  MinValidationError,
+  NgValidationError,
+  PATTERN,
+  PatternValidationError,
+  REQUIRED,
+  RequiredValidationError,
+  StandardSchemaValidationError,
+  aggregateMetadata,
+  andMetadataKey,
+  apply,
+  applyEach,
+  applyWhen,
+  applyWhenValue,
+  createMetadataKey,
+  customError,
+  debounce,
+  disabled,
+  email,
+  emailError,
+  form,
+  hidden,
+  listMetadataKey,
+  max,
+  maxError,
+  maxLength,
+  maxLengthError,
+  maxMetadataKey,
+  metadata,
+  min,
+  minError,
+  minLength,
+  minLengthError,
+  minMetadataKey,
+  orMetadataKey,
+  pattern,
+  patternError,
+  provideSignalFormsConfig,
+  readonly,
+  reducedMetadataKey,
+  required,
+  requiredError,
+  schema,
+  standardSchemaError,
+  submit,
+  validate,
+  validateAsync,
+  validateHttp,
+  validateStandardSchema,
+  validateTree,
+};
+//# sourceMappingURL=@angular_forms_signals.js.map

@@ -1,0 +1,9 @@
+<ng-container>
+  <div (click)="label.focus()">Tên</div>
+  <text-field #label [field]="form.label" [state]="fieldError(form.label)" (keydown.enter)="enter.emit()" />
+
+  <div (click)="value.focus()" class="mt-2">Khóa</div>
+  <text-field #value [field]="form.value" [state]="fieldError(form.value)" (keydown.enter)="enter.emit()" />
+
+  <c-button class="mt-2" [disabled]="form().invalid()" fullWidth (click)="enter.emit()">{{ selectedCategory() ? 'Sửa' : 'Thêm' }}</c-button>
+</ng-container>

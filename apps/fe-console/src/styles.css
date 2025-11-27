@@ -1,0 +1,41 @@
+/* You can add global styles to this file, and also import other style files */
+@import 'tailwindcss';
+
+:root {
+  --control-height: 36px;
+  --color-bg-hover: #ffffff0f;
+}
+
+@theme {
+}
+html body {
+  min-height: 100svh;
+}
+
+create-category,
+setting {
+  display: block;
+}
+
+table {
+  th,
+  td {
+    height: var(--control-height);
+    padding-inline: 6px;
+  }
+
+  tr:has(td) {
+    transition: 0.2s;
+
+    &:hover {
+      &:not(.selected) {
+        background: var(--color-bg-hover);
+      }
+    }
+
+    &.selected,
+    &.selected:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+  }
+}

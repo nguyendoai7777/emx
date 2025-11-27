@@ -1,0 +1,12 @@
+main-layout {
+  main-sidenav {
+    border-right: 1px solid gray;
+  }
+  &:has(main-sidenav.reverse) {
+    main-sidenav {
+      border-right: 0;
+      border-left: 1px solid gray;
+    }
+    flex-direction: row-reverse;
+  }
+}
