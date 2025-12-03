@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConsoleService } from './console.service';
 import { ConsoleController } from './console.controller';
-import { CategoryService } from './category.service';
-import { CategoryController } from './category.controller';
+import { CategoryService } from './category/category.service';
+import { CategoryController } from './category/category.controller';
 
 @Module({
   controllers: [ConsoleController, CategoryController],

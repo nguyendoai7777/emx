@@ -5,7 +5,7 @@ import { ResponseFactory } from '@emx/core';
 
 @Injectable()
 export class ResponseInterceptor<T> implements NestInterceptor<T, ResponseBase<T>> {
-  intercept(context: ExecutionContext, next: CallHandler) {
+  intercept(_: ExecutionContext, next: CallHandler) {
     return next.handle().pipe(
       map((data) => {
         if (data instanceof ResponseFactory) {

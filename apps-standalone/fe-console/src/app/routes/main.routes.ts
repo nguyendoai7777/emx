@@ -27,6 +27,15 @@ export const MainRoutes: NgExpandedRoutes = [
     },
   },
   {
+    path: 'product',
+    title: `Sản phẩm`,
+    loadComponent: () => import('@pages/product/product').then((c) => c.ProductPage),
+    data: {
+      title: `Sản phẩm`,
+      absoluteUrl: '/product',
+    },
+  },
+  {
     path: 'setting',
     title: `Thiết lập`,
     loadComponent: () => import('@pages/setting/setting').then((c) => c.SettingPage),

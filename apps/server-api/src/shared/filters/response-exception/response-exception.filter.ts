@@ -1,7 +1,6 @@
 import { ArgumentsHost, BadRequestException, Catch, ExceptionFilter, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
-import { ResponseTransformer, TCast } from '@shop/factory';
-import { c } from '@utils';
+import { c, ResponseFactory } from '@emx/core';
 
 @Catch(BadRequestException)
 export class ResponseExceptionFilter implements ExceptionFilter {
@@ -13,10 +12,10 @@ export class ResponseExceptionFilter implements ExceptionFilter {
     const isBadRequestFilter = (exception.getResponse() as BadRequestException).message;
     const tryAsResponseTransformer = exception.getResponse() as any;
     console.log(c.bold.hex('#ff1493')`@@ BadRequestException`, exception.getResponse());
-    if (tryAsResponseTransformer instanceof ResponseTransformer) {
+    if (tryAsResponseTransformer instanceof ResponseFactory) {
       errorMess = tryAsResponseTransformer.data;
     } else if (Array.isArray(isBadRequestFilter)) {
-      const errors = TCast<string[]>(isBadRequestFilter);
+      const errors = <string[]>isBadRequestFilter;
       const validationMap: Record<string, string> = {};
       for (const msg of errors) {
         const parts = msg.split(' ');

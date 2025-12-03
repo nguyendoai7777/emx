@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaClientService, Role } from '@prisma-provider';
+import { PrismaClientService, Role } from '@prisma-client';
 import { hash } from 'argon2';
 
 @Injectable()

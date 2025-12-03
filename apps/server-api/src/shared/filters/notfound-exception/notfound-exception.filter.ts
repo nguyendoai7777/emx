@@ -1,6 +1,6 @@
 import { ExceptionFilter, Catch, ArgumentsHost, NotFoundException } from '@nestjs/common';
 import { Response, Request } from 'express';
-import { ResponseTransformer } from '@shop/factory';
+import { ResponseFactory } from '@emx/core';
 
 @Catch(NotFoundException)
 export class NotFoundFilter implements ExceptionFilter {
@@ -9,7 +9,7 @@ export class NotFoundFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
     response.status(404).json(
-      new ResponseTransformer({
+      new ResponseFactory({
         data: request.path,
         status: 404,
         message: 'API endpoint not found',

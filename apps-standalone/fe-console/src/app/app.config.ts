@@ -3,7 +3,7 @@ import { provideRouter } from '@angular/router';
 import { ConfigService } from '@common/services';
 import { firstValueFrom, tap } from 'rxjs';
 import { AppInitConfig } from '@common/types';
-import { NetworkInterceptor } from '../shared/interceptors';
+import { NetworkInterceptor, PackerInterceptor } from '../shared/interceptors';
 import { AppRoutes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
@@ -31,7 +31,7 @@ export const appConfig: ApplicationConfig = {
     }),
     provideWindowScroll(_scrollConfig),
     provideBrowserGlobalErrorListeners(),
-    provideHttpClient(withInterceptors([NetworkInterceptor])),
+    provideHttpClient(withInterceptors([NetworkInterceptor, PackerInterceptor])),
     provideRouter(AppRoutes),
   ],
 };

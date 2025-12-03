@@ -1,11 +1,11 @@
 import { BadRequestException, HttpStatus } from '@nestjs/common';
 import { hash } from 'argon2';
-import { ResponseTransformer } from '@shop/factory';
+import { ResponseFactory } from '@emx/core';
 
 export const verifyPassword = async (password: string, verifiedPassword: string) => {
   if (verifiedPassword !== password) {
     throw new BadRequestException(
-      new ResponseTransformer({
+      new ResponseFactory({
         message: 'Password không khớp',
         status: HttpStatus.BAD_REQUEST,
       })

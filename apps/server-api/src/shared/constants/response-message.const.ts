@@ -1,3 +1,5 @@
 export const SuccessMessage = {
-  Delete: 'Xóa thành công',
+  Ok: 'Ok',
+  Deleted: 'Xóa thành công',
+  Created: `Tạo thành công`,
 };

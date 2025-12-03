@@ -9,13 +9,13 @@ datasource db {
 
 model Product {
   id               Int            @id @default(autoincrement())
-  name             String
-  brand            String?
-  title            String
+  name             String         // searchable
+  brand            String?        // searchable
+  title            String         // searchable
   description      String?
   price            Int
   stock            Int            @default(0)
-  discountPercent  Int?
+  discountPercent  Int?           // filterable
   createdAt        DateTime       @default(now())
   categoryId       Int
   conditionType    ConditionType  @default(NEW)
@@ -25,6 +25,10 @@ model Product {
   images           ProductImage[]
 
   @@index([categoryId], map: "Product_categoryId_fkey")
+  @@index([name])
+  @@index([brand])
+  @@index([title])
+  @@fulltext([name, brand, title]) // for full-text search
 }
 
 model ProductImage {

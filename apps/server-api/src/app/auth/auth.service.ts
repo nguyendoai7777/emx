@@ -1,6 +1,6 @@
 import { BadRequestException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { DtoLogin } from '@emx/dto';
-import { PrismaClientService } from '@prisma-provider';
+import { PrismaClientService } from '@prisma-client';
 import { JwtService } from '@nestjs/jwt';
 import { RedisService } from '@services';
 import { LoginResponse, UserJWT } from '@emx/types';
@@ -67,11 +67,7 @@ export class AuthService {
     const accessKey = `${RedisKey.tokenAccess}:${user.id}`;
     await Promise.all([this.redis.del(refreshKey), this.redis.del(accessKey)]);
 
-    const payload: Partial<UserJWT> = {
-      id: user.id,
-      phone: user.phone,
-      email: user.email,
-    };
+    const payload: UserJWT = omitKeyInObj(user, 'password', 'username', 'updatedAt', 'createdAt');
 
     const token = await this.jwt$$.signAsync(payload);
 
@@ -86,14 +82,13 @@ export class AuthService {
     await this.redis.set(rfKey, refreshToken, 30 * 24 * 3600);
     await this.redis.set(acKey, token, 7 * 24 * 3600);
 
-    const user2 = omitKeyInObj(user, 'password', 'role', 'username');
     return new ResponseFactory<LoginResponse>({
       message: 'success',
       status: HttpStatus.OK,
       data: {
         accessToken: token,
         refreshToken,
-        user: user2,
+        user: payload,
       },
     });
   }

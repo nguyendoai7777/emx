@@ -2,16 +2,15 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConsoleModule } from './console/console.module';
-import { PrismaClientModule } from '@prisma-provider';
+import { PrismaClientModule } from '@prisma-client';
 import { join } from 'node:path';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { AuthModule } from './auth/auth.module';
 import { ProductModule } from './product/product.module';
 import { ShopModule } from './shop/shop.module';
 import { APP_GUARD } from '@nestjs/core';
-import { AuthGuard } from '../shared/guards/auth.guard';
+import { AuthGuard } from '@guards';
 import { RedisModule } from '@services';
-import { JwtService } from '@nestjs/jwt';
 
 @Module({
   controllers: [AppController],

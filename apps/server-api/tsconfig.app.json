@@ -10,8 +10,7 @@
     "target": "es2021",
     "baseUrl": ".",
     "paths": {
-      "@prisma-provider": ["src/prisma/provider"],
-      "@prisma-client": ["src/prisma/client"],
+      "@prisma-client": ["src/prisma"],
       "@decorators": ["src/shared/decorators"],
       "@filters": ["src/shared/filters"],
       "@interceptors": ["src/shared/interceptors"],
@@ -26,6 +25,9 @@
   "include": ["src/**/*.ts"],
   "exclude": [],
   "references": [
+    {
+      "path": "../../packages/orm/tsconfig.lib.json"
+    },
     {
       "path": "../../packages/types/tsconfig.lib.json"
     },

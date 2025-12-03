@@ -8,7 +8,12 @@
   "projects": {
     "fe-console": {
       "projectType": "application",
-      "schematics": {},
+      "schematics": {
+        "@schematics/angular:component": {
+          "skipTests": true,
+          "viewEncapsulation": "None"
+        }
+      },
       "root": "",
       "sourceRoot": "src",
       "prefix": "",

@@ -1,4 +1,4 @@
-version: '3'
+#version: '3'
 services:
   db:
     image: mysql:8.0
@@ -17,6 +17,8 @@ services:
     container_name: jpa_redis
     ports:
       - "6379:6379"
+#    environment:
+#      REDIS_PASSWORD: 123123
   #  db_postgres:
   #    image: postgres:15
   #    container_name: shop_postgres_db

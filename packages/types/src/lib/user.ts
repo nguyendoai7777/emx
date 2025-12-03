@@ -1,7 +1,10 @@
+import type { UserRole } from '@emx/orm';
+
 export interface UserJWT {
   id: number;
   email: string;
   phone: string;
-  createdAt: Date;
-  updatedAt: Date;
+  role: UserRole;
+  // createdAt: Date;
+  // updatedAt: Date;
 }

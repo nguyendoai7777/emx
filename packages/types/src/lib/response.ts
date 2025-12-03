@@ -13,13 +13,16 @@ export type ResponseBase<T = void> = [T] extends [void]
   ? Prettify<Omit<ResponseBaseShape<T>, 'data'>>
   : Required<ResponseBaseShape<T>>;
 
+export type PaginationMeta = Prettify<
+  Required<Pagination> & { total: number; totalPages: number; hasNext: boolean; hasPrev: boolean }
+>;
+
 export type ResponseWithPagination<T> = ResponseBase<T> & {
-  pagination: Prettify<Pagination & { total: number }>;
+  pagination: PaginationMeta;
 };
 
-
 export interface LoginResponse {
-  accessToken: string
-  refreshToken: string
-  user: UserJWT
+  accessToken: string;
+  refreshToken: string;
+  user: UserJWT;
 }

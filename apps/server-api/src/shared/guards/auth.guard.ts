@@ -2,9 +2,10 @@ import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import chalk from 'chalk';
-import { Deeppink, DodgeBlue, RedisKey } from '@constants';
+import { Deeppink, DodgeBlue, RedisKey, ReflectMetadataKey } from '@constants';
 import { RedisService } from '@services';
 import { UserJWT } from '@emx/types';
+import { Reflector } from '@nestjs/core';
 
 function pathToRegex(pattern: string): RegExp {
   let regexStr = pattern.replace(/\*\*/g, '<<<DOUBLE>>>').replace(/\*/g, '<<<SINGLE>>>');
@@ -23,8 +24,9 @@ const openRoutes = ['/api/auth/**', '/api/public/**', '/api/ping', '/api/seed'];
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
-    private jwtService: JwtService,
-    private readonly redis: RedisService
+    private readonly jwtService: JwtService,
+    private readonly redis: RedisService,
+    private readonly reflector: Reflector
   ) {}
   async canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest();
@@ -34,6 +36,11 @@ export class AuthGuard implements CanActivate {
       url: request.url,
       isPublic: isOpenRoute(request.url, openRoutes),
     });
+
+    const isPublic = this.reflector.get<boolean>(ReflectMetadataKey.IsPublicRoute, context.getHandler());
+    if (isPublic) {
+      return true;
+    }
     if (isOpenRoute(request.url, openRoutes)) {
       return true;
     }

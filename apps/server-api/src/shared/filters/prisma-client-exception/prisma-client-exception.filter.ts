@@ -1,8 +1,10 @@
 import { ArgumentsHost, Catch, HttpStatus } from '@nestjs/common';
 import { BaseExceptionFilter } from '@nestjs/core';
-import { Prisma } from '@prismax';
+
 import { Response } from 'express';
-import { ResponseTransformer } from '@shop/factory';
+import { Prisma } from '@emx/orm';
+import { ResponseFactory } from '@emx/core';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
 
 interface ORMErrorCode {
   message: string;
@@ -24,7 +26,7 @@ const uniqueConstraintMessages: Record<string, ORMErrorCode> = {
   },
 };
 
-function mapPrismaError(exception: Prisma.PrismaClientKnownRequestError) {
+function mapPrismaError(exception: PrismaClientKnownRequestError) {
   if (exception.code === 'P2002') {
     const constraint = exception.meta?.target as string | undefined;
 
@@ -61,7 +63,7 @@ function mapPrismaError(exception: Prisma.PrismaClientKnownRequestError) {
   );
 }
 
-@Catch(Prisma.PrismaClientKnownRequestError)
+@Catch(PrismaClientKnownRequestError)
 export class PrismaClientExceptionFilter extends BaseExceptionFilter {
   override catch(exception: Prisma.PrismaClientKnownRequestError, host: ArgumentsHost) {
     console.info(`@@ PrismaClientKnownRequestError`, JSON.stringify(exception));
@@ -70,7 +72,7 @@ export class PrismaClientExceptionFilter extends BaseExceptionFilter {
     const { message, code } = mapPrismaError(exception);
 
     response.status(HttpStatus.BAD_REQUEST).json(
-      new ResponseTransformer({
+      new ResponseFactory({
         message,
         status: code,
       }).data

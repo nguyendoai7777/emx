@@ -27,6 +27,7 @@
       "@common/guards": ["src/shared/guards"],
       "@common/types": ["src/shared/types"],
       "@common/services": ["src/shared/services"],
+      "@common/abstracts": ["src/shared/abstracts"],
       "@ui/routes/*": ["src/app/routes/*"],
       "@ui/layouts/*": ["src/app/layouts/*"]
     }

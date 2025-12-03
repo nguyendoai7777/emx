@@ -11,8 +11,7 @@ module.exports = {
   },
   resolve: {
     alias: {
-      '@prisma-provider': join(__dirname, 'src/prisma/provider'),
-      '@prisma-client': join(__dirname, 'src/prisma/client'),
+      '@prisma-client': join(__dirname, 'src/prisma'),
       '@filters': join(__dirname, 'src/shared/filters'),
       '@interceptors': join(__dirname, 'src/shared/interceptors'),
       '@types': join(__dirname, 'src/shared/types'),
