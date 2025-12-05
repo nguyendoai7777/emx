@@ -1,0 +1,12 @@
+@for (p of pg.pages(); track $index) {
+  @let disabled = p === '...';
+  <button
+    matRipple
+    [class.current]="page() === p"
+    class="pg-item {{ disabled ? '' : 'box' }}"
+    (click)="pg.goToPage(p)"
+    [disabled]="disabled"
+  >
+    {{ p }}
+  </button>
+}

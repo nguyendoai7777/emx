@@ -1,0 +1,40 @@
+ng-paginator {
+  display: flex;
+  gap: 2px;
+
+  .box {
+    min-width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .pg-item {
+    transition: 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 4px;
+    padding-inline: 4px;
+
+    &:not([disabled]) {
+      cursor: pointer;
+
+      &:hover {
+        background-color: rgba(213, 213, 213, 0.25);
+      }
+
+      &.current {
+        color: var(--primary-color, var(--mat-sys-primary, #0078d4));
+        position: relative;
+
+        &:after {
+          content: '';
+          display: block;
+          position: absolute;
+          inset: 0;
+          background: var(--primary-color, var(--mat-sys-primary, #0078d4));
+          opacity: 0.15;
+        }
+      }
+    }
+  }
+}

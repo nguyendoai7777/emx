@@ -8,14 +8,73 @@
 
 @theme {
 }
-html body {
-  min-height: 100svh;
+.main-content {
+  view-transition-name: main-content;
+}
+
+/* 2. Disable default root animation (so the whole page doesn't move) */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+/* 3. Apply animations to the main-content instead */
+::view-transition-old(main-content),
+::view-transition-new(main-content) {
+  animation-duration: 300ms;
+  animation-timing-function: ease-in-out;
+}
+
+/* Forward Navigation (Slide Left) */
+:root.forward::view-transition-old(main-content) {
+  animation-name: slide-out-left;
+}
+
+:root.forward::view-transition-new(main-content) {
+  animation-name: slide-in-right;
+}
+
+/* Backward Navigation (Slide Right) */
+:root.backward::view-transition-old(main-content) {
+  animation-name: slide-out-right;
+  z-index: 100;
+}
+
+:root.backward::view-transition-new(main-content) {
+  animation-name: slide-in-left;
+}
+
+@keyframes slide-out-left {
+  to {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes slide-out-right {
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
 }
 
 @media (prefers-color-scheme: dark) {
   body {
     background-color: var(--mat-sys-surface);
-
     color: #e0e0e0; /* Chữ sáng */
   }
 
@@ -23,6 +82,7 @@ html body {
     filter: brightness(0.8) contrast(1.2);
   }
 }
+
 create-category,
 setting {
   display: block;
@@ -51,10 +111,6 @@ table {
   }
 }
 
-html,
-body {
-  height: 100%;
-}
 body {
   margin: 0;
   font-family: Roboto, 'Helvetica Neue', sans-serif;

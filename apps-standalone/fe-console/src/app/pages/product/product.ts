@@ -1,7 +1,11 @@
 import { Component, effect, inject, signal, ViewEncapsulation } from '@angular/core';
-import { useListBase } from '@common/abstracts';
+import { useb, useListBase } from '@common/abstracts';
 import { ProductService } from '@pages/product/product.service';
 import { packr } from '@common/services';
+
+interface ProductProps {
+  id: number;
+}
 
 @Component({
   selector: 'product',
@@ -11,7 +15,8 @@ import { packr } from '@common/services';
   encapsulation: ViewEncapsulation.None,
 })
 export class ProductPage {
-  lb = useListBase<{ id: number }>(`/product`);
+  lb = useListBase<ProductProps>(`/product`);
+  lb2 = useb<ProductProps>(`/product`);
   private readonly $$ = inject(ProductService);
   readonly file = signal<File>();
 

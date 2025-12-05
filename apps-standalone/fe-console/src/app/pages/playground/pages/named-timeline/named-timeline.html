@@ -1,0 +1,17 @@
+<div class="container">
+  <h1>Named Scroll Timeline</h1>
+  <p>The progress bar below is animated by the scroll position of the carousel.</p>
+
+  <!-- External Indicator -->
+  <div class="indicator-container">
+    <div class="indicator-bar"></div>
+  </div>
+
+  <!-- Horizontal Carousel (Scroller) -->
+  <div class="carousel" (scroll)="onScroll($event)">
+    @for (item of items; track item) {
+      <div class="card">Item {{ item }}</div>
+    }
+  </div>
+</div>
+<div class="text-center mb-4 font-bold">Progress: {{ progress() }}%</div>

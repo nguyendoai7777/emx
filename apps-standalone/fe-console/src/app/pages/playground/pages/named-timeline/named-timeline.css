@@ -1,0 +1,77 @@
+.container {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  /* Allow the named timeline to be visible to siblings (indicator) */
+  timeline-scope: --carousel-timeline;
+}
+
+/* External Indicator */
+.indicator-container {
+  width: 100%;
+  height: 10px;
+  background: #eee;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.indicator-bar {
+  height: 100%;
+  background: #6200ea;
+  width: 0%; /* Start at 0 width */
+
+  /* Link animation to the named timeline */
+  animation: progress-grow linear forwards;
+  animation-timeline: --carousel-timeline;
+}
+
+@keyframes progress-grow {
+  to {
+    width: 100%;
+  }
+}
+
+/* Carousel (Scroller) */
+.carousel {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding-bottom: 20px;
+
+  /* Define the named timeline here */
+  scroll-timeline-name: --carousel-timeline;
+  scroll-timeline-axis: inline; /* Horizontal scroll */
+}
+
+.card {
+  flex: 0 0 200px;
+  height: 150px;
+  background: #03a9f4;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  border-radius: 8px;
+
+  /* Add animation to items themselves */
+  animation: scale-up linear both;
+  animation-timeline: view(inline);
+  animation-range: entry 0% cover 100%;
+}
+
+@keyframes scale-up {
+  from {
+    opacity: 0.5;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0.5;
+    transform: scale(0.8);
+  }
+}

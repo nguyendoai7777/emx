@@ -1,0 +1,14 @@
+<p>dialog-viewer works!</p>
+
+<div><b>count</b> = {{ count() }}</div>
+
+<button (click)="increment()">Increment</button>
+<button (click)="decrement()">Decrement</button>
+
+<h2><code>animate.leave</code> Example</h2>
+<button type="button" (click)="toggle()">Toggle Element</button>
+@if (isShown()) {
+  <div class="leave-container" animate.leave="leaving">
+    <p>Goodbye</p>
+  </div>
+}

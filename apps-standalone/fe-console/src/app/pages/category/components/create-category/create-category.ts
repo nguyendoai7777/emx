@@ -1,10 +1,8 @@
-import { ChangeDetectionStrategy, Component, output, signal, viewChild, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, Component, output, signal, ViewEncapsulation } from '@angular/core';
 import { CButton, TextField } from '@ui/components';
 import { Field, required } from '@angular/forms/signals';
-import type { DtoCategory } from '@emx/dto';
 import { createForm, fieldError } from '@common/utils';
 import { ProductCategory } from '@emx/types';
-import { uuid } from '@emx/core';
 import { CreateCategoryFormProps } from '@common/types';
 
 @Component({
@@ -27,6 +25,14 @@ export class CreateCategoryForm {
     required(p.label, { message: 'Nhập đi' });
     required(p.value, { message: 'Nhập đi' });
   });
+  protected loading = signal(false);
+
+  ngOnInit() {
+    setInterval(() => {
+      // this.loading.update((v) => !v);
+      console.log(this.loading());
+    }, 2000);
+  }
 
   setup(category: ProductCategory) {
     const selected = this.selectedCategory();

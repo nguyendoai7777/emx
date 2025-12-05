@@ -1,16 +1,26 @@
 import { ChangeDetectionStrategy, Component, inject, signal, viewChild, ViewEncapsulation } from '@angular/core';
 import { CategoryService } from '@pages/category/category.service';
-import { DtoPagination } from '@emx/dto';
 import { ProductCategory } from '@emx/types';
 import { DatePipe } from '@angular/common';
 import { CreateCategoryForm } from '@pages/category/components/create-category/create-category';
-import { CButton } from '@ui/components';
 import { CdkContextMenuTrigger, CdkMenu, CdkMenuItem } from '@angular/cdk/menu';
 import { MatButton } from '@angular/material/button';
+import { useListBase } from '@common/abstracts';
+import { NgPaginator } from '@components/paginator/ng-paginator.component';
+import { CircularIndicator } from '@components/indicator-circular/indicator-circular.component';
 
 @Component({
   selector: 'category',
-  imports: [DatePipe, CreateCategoryForm, CButton, CdkMenu, CdkMenuItem, CdkContextMenuTrigger, MatButton],
+  imports: [
+    DatePipe,
+    CreateCategoryForm,
+    CdkMenu,
+    CdkMenuItem,
+    CdkContextMenuTrigger,
+    MatButton,
+    NgPaginator,
+    CircularIndicator,
+  ],
   templateUrl: './category.html',
   styleUrl: './category.scss',
   encapsulation: ViewEncapsulation.None,
@@ -23,28 +33,17 @@ export class CategoryPage {
   readonly formRef = viewChild.required(CreateCategoryForm);
 
   private readonly $$ = inject(CategoryService);
-
-  readonly paginator = signal<DtoPagination>({
-    page: 1,
-    size: 20,
-    search: '',
-  });
-  readonly data = signal<ProductCategory[]>([]);
+  protected lb = useListBase<ProductCategory>(`/category`);
 
   ngOnInit() {
-    this.getList();
+    this.lb.getList();
   }
 
-  getList() {
-    this.$$.getList(this.paginator()).subscribe((res) => {
-      this.data.set(res.data);
-    });
-  }
   headers = ['ID', 'Tên', 'Khóa', 'Tạo lúc', 'Cập nhật'];
   private create() {
     this.$$.create(this.formRef().form().controlValue()).subscribe({
       next: () => {
-        this.getList();
+        this.lb.getList();
       },
     });
   }

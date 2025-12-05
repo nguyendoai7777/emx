@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 @Injectable({
   providedIn: 'root',
 })
-export class ListBaseService<TDataList> implements ListBaseImpl {
+export class ListBaseService implements ListBaseImpl {
   private readonly http = inject(HttpClient);
 
   getList<TDataObs>(url: string, params?: object | undefined) {

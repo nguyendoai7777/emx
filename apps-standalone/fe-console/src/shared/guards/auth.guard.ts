@@ -1,7 +1,7 @@
 import { CanActivateFn, Router } from '@angular/router';
 import { LocalStorageKey } from '@common/constants';
 import { inject } from '@angular/core';
-import { clearStorage } from '../utils/storage.utils';
+import { clearStorage } from '@common/utils';
 
 export const AuthGuard: CanActivateFn = () => {
   const token = localStorage.getItem(LocalStorageKey.accessToken);

@@ -7,7 +7,7 @@
     </tr>
   </thead>
   <tbody>
-    @for (b of data(); track b.id) {
+    @for (b of lb.data(); track b.id) {
       <tr
         [class.selected]="c.selectedCategory()?.id === b.id || selectedCategoryItem()?.id === b.id"
         (click)="selectedCategory(b)"
@@ -23,6 +23,12 @@
     }
   </tbody>
 </table>
+<div>
+  <div>
+    Current page <b>{{ lb.paginator().page }}</b>
+  </div>
+  <ng-paginator [totalRecords]="1232345" [size]="2" [(page)]="lb.paginator().page" />
+</div>
 
 <ng-template #contextMenu>
   @let item = selectedCategoryItem();

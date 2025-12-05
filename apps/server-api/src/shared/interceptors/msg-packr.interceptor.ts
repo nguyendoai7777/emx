@@ -4,24 +4,18 @@ import { Request, Response } from 'express';
 import { $pack, $unpack } from '@utils';
 
 export class MsgPackInterceptor implements NestInterceptor {
-  constructor() {
-    console.log(`@@ MsgPackInterceptor inited`);
-  }
   intercept(context: ExecutionContext, next: CallHandler) {
     const ctx = context.switchToHttp();
     const request = ctx.getRequest<Request>();
     const response = ctx.getResponse<Response>();
 
-    // Xử lý request nếu là msgpack
     if (request.headers['content-type'] === 'application/x-msgpack') {
       // Đọc raw body từ request
       const rawBody = request.body;
       if (Buffer.isBuffer(rawBody)) {
         try {
           const unpackedArray = $unpack(rawBody);
-          const unpacked = unpackedArray.length === 1 ? unpackedArray[0] : unpackedArray;
-
-          request.body = unpacked;
+          request.body = unpackedArray.length === 1 ? unpackedArray[0] : unpackedArray;
           console.log('Unpacked success with multiple:', unpackedArray);
         } catch (error) {
           console.log(`@@ error `, error);
