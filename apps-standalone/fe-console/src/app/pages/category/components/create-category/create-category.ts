@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, output, signal, ViewEncapsulation } from '@angular/core';
-import { CButton, TextField } from '@ui/components';
+import { TextField } from '@ui/components';
 import { Field, required } from '@angular/forms/signals';
 import { createForm, fieldError } from '@common/utils';
 import { ProductCategory } from '@emx/types';
@@ -7,7 +7,7 @@ import { CreateCategoryFormProps } from '@common/types';
 
 @Component({
   selector: 'create-category',
-  imports: [TextField, Field, CButton],
+  imports: [TextField, Field],
   templateUrl: './create-category.html',
   styleUrl: './create-category.css',
   encapsulation: ViewEncapsulation.None,
