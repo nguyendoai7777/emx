@@ -1,11 +1,29 @@
 <ng-container>
   <div (click)="label.focus()">Tên</div>
-  <text-field #label [field]="form.label" [state]="fieldError(form.label)" (keydown.enter)="enter.emit()" />
-
+  <field-control>
+    <text-field #label [field]="form.label" [state]="fieldError(form.label)" (keydown.enter)="enter.emit()" />
+  </field-control>
   <div (click)="value.focus()" class="mt-2">Khóa</div>
   <text-field #value [field]="form.value" [state]="fieldError(form.value)" (keydown.enter)="enter.emit()" />
 
+  @let variant = form.variant;
+  <div class="mt-2 font-semibold">Biến thể</div>
+  @for (item of variant; track $index) {
+    <div class="flex gap-2 mt-2">
+      <text-field
+        class="flex-1"
+        [field]="item.name"
+        [state]="fieldError(item.name)"
+        placeholder="Tên biến thể"
+        (keydown.enter)="enter.emit()"
+      />
+      <c-button (click)="onRemoveVariant($index)">Xóa</c-button>
+    </div>
+  }
   <c-button [loading]="loading()" class="mt-2" [disabled]="form().invalid()" fullWidth (click)="enter.emit()">
     {{ selectedCategory() ? 'Sửa' : 'Thêm' }}
   </c-button>
 </ng-container>
+
+<c-button fullWidth (click)="onAddVariant()"> add </c-button>
+<c-button fullWidth (click)="onTouchedAll()">Touched All</c-button>

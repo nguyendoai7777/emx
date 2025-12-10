@@ -10,9 +10,6 @@
   "exclude": ["src/**/*.spec.ts"],
   "references": [
     {
-      "path": "../../packages/core/tsconfig.lib.json"
-    },
-    {
       "path": "../../packages/types/tsconfig.lib.json"
     },
     {

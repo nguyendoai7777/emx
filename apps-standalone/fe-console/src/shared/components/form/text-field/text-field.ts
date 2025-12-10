@@ -34,6 +34,9 @@ import { DisabledReason, FormValueControl, ValidationError, WithOptionalField } 
   styles: `
     text-field {
       input {
+        padding: calc(5px / 2) 0 0 0;
+        height: auto;
+
         &:focus-visible {
           outline: none;
         }
@@ -52,7 +55,18 @@ export class TextField implements FormValueControl<string> {
   // invalid?: InputSignal<boolean> | undefined;
   readonly invalid = input(false);
   readonly type = input<'text' | 'password'>('text');
-  errors?: InputSignal<readonly WithOptionalField<ValidationError>[]> | undefined;
+
+  useWaring = input('');
+
+  errors = input<readonly ValidationError[]>([]);
+
+  private readonly elr = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly styleMapped: Record<ControlFieldState, any> = {
+    normal: `border-gray-500 has-[:focus-visible]:border-gray-400 hover:border-gray-400`,
+    error: `border-red-500 has-[:focus-visible]:border-red-400 hover:border-red-400`,
+    warning: `border-orange-400 has-[:focus-visible]:border-orange-300 hover:border-orange-300`,
+  };
+
   disabled?: InputSignal<boolean> | undefined;
   disabledReasons?: InputSignal<readonly WithOptionalField<DisabledReason>[]> | undefined;
   readonly?: InputSignal<boolean> | undefined;
@@ -71,28 +85,27 @@ export class TextField implements FormValueControl<string> {
   readonly placeholder = input('');
   readonly state = input<ControlFieldState>('normal');
   readonly rootClasses = computed(() => `${this.fullWidth() ? 'w-full ' : ''} ${this.styleMapped[this.state()]}`);
-  private readonly elr = inject<ElementRef<HTMLElement>>(ElementRef);
-  private readonly styleMapped: Record<ControlFieldState, any> = {
-    normal: `border-gray-500 has-[:focus-visible]:border-gray-400 hover:border-gray-400`,
-    error: `border-red-500 has-[:focus-visible]:border-red-400 hover:border-red-400`,
-    warning: `border-orange-400 has-[:focus-visible]:border-orange-300 hover:border-orange-300`,
-  };
+
   focus() {
     this.inputElement().nativeElement.focus();
   }
   constructor() {
+    const elementRef = this.elr.nativeElement;
+    effect(() => {
+      console.log(`[TextField] [errors]`, this.errors());
+    });
     effect(() => {
       if (this.invalid()) {
-        this.elr.nativeElement.setAttribute('aria-invalid', '');
+        elementRef.setAttribute('aria-invalid', '');
       } else {
-        this.elr.nativeElement.removeAttribute('aria-invalid');
+        elementRef.removeAttribute('aria-invalid');
       }
     });
     effect(() => {
       if (this.touched()) {
-        this.elr.nativeElement.setAttribute('aria-touched', '');
+        elementRef.setAttribute('aria-touched', '');
       } else {
-        this.elr.nativeElement.removeAttribute('aria-touched');
+        elementRef.removeAttribute('aria-touched');
       }
     });
   }

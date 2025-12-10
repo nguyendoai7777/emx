@@ -24,6 +24,7 @@
       "@common/utils": ["src/shared/utils"],
       "@common/pipes": ["src/shared/pipes"],
       "@common/constants": ["src/shared/constants"],
+      "@common/interceptors": ["src/shared/interceptors"],
       "@common/guards": ["src/shared/guards"],
       "@common/types": ["src/shared/types"],
       "@common/services": ["src/shared/services"],

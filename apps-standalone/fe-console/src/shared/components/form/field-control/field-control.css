@@ -1,0 +1,65 @@
+@keyframes ErrorABounceIn {
+  0% {
+    /* Không cần define 0% vì @starting-style sẽ handle */
+  }
+  40% {
+    transform: translateY(-65%) scale(1.05);
+    opacity: 0.9;
+  }
+  70% {
+    transform: translateY(-20%) scale(0.98);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes ErrorASlideOut {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100%) scale(0.2);
+    opacity: 0;
+  }
+}
+
+field-control {
+  display: block;
+
+  .error-placeholder {
+    height: var(--field-error-height, 16px);
+    margin-top: var(--field-error-mdt, 4px);
+    margin-left: var(--field-error-mdl, 8px);
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  /* Keyframe cho animation phức tạp với nhiều bước */
+
+  .error-boxer {
+    font-size: var(--field-error-text-size, 12px);
+    line-height: calc(var(--field-error-text-size, 12px) + 2px);
+    color: var(--field-error-color, var(--color-red-500, #f44336));
+    transition: var(--field-error-duration, 200ms) ease-out;
+    /* Final state */
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    /*animation: ErrorABounceIn var(--field-error-duration, 300ms) ease-out;*/
+    @starting-style {
+      opacity: 0;
+      transform: translateY(-100%) scale(0.8);
+    }
+  }
+
+  /* Exit state */
+
+  .leaving {
+    opacity: 0;
+    /*animation: ErrorASlideOut var(--field-error-duration, 300ms) ease-out forwards;*/
+    transform: translateY(-100%) scale(0.8);
+  }
+}

@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import chalk from 'chalk';
@@ -46,19 +46,28 @@ export class AuthGuard implements CanActivate {
     }
 
     const token = this.extractTokenFromHeader(request);
+    console.log(`@@ token: `, token);
     if (!token) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Unauthorized');
     }
 
-    const user = await this.jwtService.verifyAsync<UserJWT>(token);
-    const accessKey = `${RedisKey.tokenAccess}:${user.id}`;
-    const storedToken = await this.redis.get<string>(accessKey);
-    if (!storedToken || storedToken !== token) {
-      throw new UnauthorizedException();
-    }
-    request['user'] = user;
+    try {
+      const user = await this.jwtService.verifyAsync<UserJWT>(token);
+      const accessKey = `${RedisKey.tokenAccess}:${user.id}`;
+      const storedToken = await this.redis.get<string>(accessKey);
+      console.log(`@@ stored token: `, {
+        storedToken,
+        token,
+      });
+      request['user'] = user;
 
-    return true;
+      return true;
+    } catch (error) {
+      throw new UnauthorizedException({
+        code: 403,
+        message: 'Token expired',
+      });
+    }
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {

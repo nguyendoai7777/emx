@@ -11,16 +11,7 @@ import { CircularIndicator } from '@components/indicator-circular/indicator-circ
 
 @Component({
   selector: 'category',
-  imports: [
-    DatePipe,
-    CreateCategoryForm,
-    CdkMenu,
-    CdkMenuItem,
-    CdkContextMenuTrigger,
-    MatButton,
-    NgPaginator,
-    CircularIndicator,
-  ],
+  imports: [DatePipe, CreateCategoryForm, CdkMenu, CdkMenuItem, CdkContextMenuTrigger, MatButton, NgPaginator],
   templateUrl: './category.html',
   styleUrl: './category.scss',
   encapsulation: ViewEncapsulation.None,

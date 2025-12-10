@@ -1,0 +1,7 @@
+<ng-content select="text-field" />
+@let error = textFieldError();
+<div class="error-placeholder">
+  @if (!!error) {
+    <div class="error-boxer" animate.leave="leaving">{{ error }}</div>
+  }
+</div>
