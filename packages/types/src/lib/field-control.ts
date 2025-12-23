@@ -6,4 +6,5 @@ export interface ControlFieldProps {
   color: string;
 }
 
-export type ControlFieldState = 'error' | 'warning' | 'normal'
+/** @type {'error' | 'warning' | ''} */
+export type ControlFieldKind = 'error' | 'warning' | '';

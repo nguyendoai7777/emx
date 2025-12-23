@@ -1,5 +1,5 @@
 import { ApplicationConfig, inject, provideAppInitializer, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withViewTransitions } from '@angular/router';
 import { ConfigService } from '@common/services';
 import { firstValueFrom, tap } from 'rxjs';
 import { AppInitConfig } from '@common/types';
@@ -31,6 +31,11 @@ export const appConfig: ApplicationConfig = {
     provideWindowScroll(_scrollConfig),
     provideBrowserGlobalErrorListeners(),
     provideHttpClient(withInterceptors([NetworkInterceptor, PackerInterceptor, CatchErrorInterceptor])),
-    provideRouter(AppRoutes),
+    provideRouter(
+      AppRoutes,
+      withViewTransitions({
+        skipInitialTransition: true,
+      })
+    ),
   ],
 };

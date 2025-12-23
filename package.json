@@ -33,7 +33,7 @@
     "dayjs": "^1.11.19",
     "ioredis": "^5.8.2",
     "msgpackr": "^1.11.5",
-    "next": "~16.0.1",
+    "next": "^16.0.10",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "reflect-metadata": "^0.1.13",
