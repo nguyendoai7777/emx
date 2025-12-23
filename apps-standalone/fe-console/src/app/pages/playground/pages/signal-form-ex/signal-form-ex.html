@@ -1,0 +1,14 @@
+<label>
+  <div>Name:</div>
+  <text-field [field]="form.name" />
+</label>
+<label>
+  <div>Age:</div>
+  <number-field [field]="form.age" />
+</label>
+<label>
+  <div>Email:</div>
+  <text-field [field]="form.email" />
+</label>
+
+<button matButton="elevated" (click)="onSubmit()">Submit</button>

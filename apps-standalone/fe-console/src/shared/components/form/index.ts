@@ -1,2 +1,2 @@
-export * from './text-field';
+export * from './input-field';
 export * from './field-control';

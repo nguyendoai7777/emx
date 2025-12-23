@@ -7,7 +7,6 @@ import { CdkContextMenuTrigger, CdkMenu, CdkMenuItem } from '@angular/cdk/menu';
 import { MatButton } from '@angular/material/button';
 import { useListBase } from '@common/abstracts';
 import { NgPaginator } from '@components/paginator/ng-paginator.component';
-import { CircularIndicator } from '@components/indicator-circular/indicator-circular.component';
 
 @Component({
   selector: 'category',

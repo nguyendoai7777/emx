@@ -1,0 +1,13 @@
+text-field,
+field-control-ex,
+number-field {
+  input {
+    &:focus-visible {
+      outline: none;
+    }
+
+    &::placeholder {
+      font-size: 12px;
+    }
+  }
+}

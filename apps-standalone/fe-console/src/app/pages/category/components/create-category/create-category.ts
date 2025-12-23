@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, output, signal, ViewEncapsulation } from '@angular/core';
+import { Component, output, signal, ViewEncapsulation } from '@angular/core';
 import { CButton, FieldControl, TextField } from '@ui/components';
-import { customError, Field, required, validate } from '@angular/forms/signals';
-import { createForm, fieldError, markAllAsTouched } from '@common/utils';
+import { required } from '@angular/forms/signals';
+import { createCustomError, createFieldValidator, createForm, fieldError, markAllAsTouched } from '@common/utils';
 import { Prettify, ProductCategory } from '@emx/types';
 import { CreateCategoryFormProps } from '@common/types';
 
@@ -13,11 +13,10 @@ type Vx = Prettify<
 
 @Component({
   selector: 'create-category',
-  imports: [Field, CButton, TextField, FieldControl],
+  imports: [CButton, TextField, FieldControl],
   templateUrl: './create-category.html',
   styleUrl: './create-category.css',
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CreateCategoryForm {
   readonly enter = output();
@@ -36,26 +35,15 @@ export class CreateCategoryForm {
   readonly form = createForm(this.____, (p) => {
     required(p.label, { message: 'Nhập đi' });
     required(p.value, { message: 'Nhập đi' });
-    validate(p.variant, (ctx) => {
-      customError({
-        message: '',
-      });
+    createFieldValidator(p.label, (ctx) => {
+      if (ctx.value() !== 'okela') {
+        return createCustomError({
+          message: 'Phải là okela',
+          kind: 'warning',
+        });
+      }
+      return null;
     });
-    validate(p, (ctx) => {
-      ctx.field;
-    });
-    validate(p.value, (ctx) => {
-      ctx.key;
-    });
-    /*createFieldValidator(p.variant, (ctx) => {
-      console.log(`CF Array: `, { context: ctx.value() });
-    });
-    createFieldValidator(p, (ctx) => {
-      console.log(`CF Root/Object: `, { context: ctx.value() });
-    });
-    createFieldValidator(p.value, (ctx) => {
-      console.log(`CF Field: `, { context: ctx.field() });
-    });*/
   });
   protected loading = signal(false);
 

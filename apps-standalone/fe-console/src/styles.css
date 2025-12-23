@@ -6,8 +6,8 @@
   --color-bg-hover: #ffffff0f;
 }
 
-@theme {
-}
+/* View Transitions */
+/* 1. Define the transition name for the content wrapper */
 .main-content {
   view-transition-name: main-content;
 }
@@ -72,6 +72,20 @@
   }
 }
 
+@keyframes slide-out-right {
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+
 @media (prefers-color-scheme: dark) {
   body {
     background-color: var(--mat-sys-surface);
@@ -114,4 +128,18 @@ table {
 body {
   margin: 0;
   font-family: Roboto, 'Helvetica Neue', sans-serif;
+}
+
+text-field,
+field-control-ex,
+number-field {
+  input {
+    &:focus-visible {
+      outline: none;
+    }
+
+    &::placeholder {
+      font-size: 12px;
+    }
+  }
 }

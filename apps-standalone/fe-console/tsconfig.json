@@ -21,6 +21,7 @@
       "@components": ["src/app/components"],
       "@components/*": ["src/app/components/*"],
       "@ui/components": ["src/shared/components"],
+      "@ui/components/experimental": ["src/shared/experimental"],
       "@common/utils": ["src/shared/utils"],
       "@common/pipes": ["src/shared/pipes"],
       "@common/constants": ["src/shared/constants"],
@@ -30,7 +31,7 @@
       "@common/services": ["src/shared/services"],
       "@common/abstracts": ["src/shared/abstracts"],
       "@ui/routes/*": ["src/app/routes/*"],
-      "@ui/layouts/*": ["src/app/layouts/*"]
+      "@ui/layouts/*": ["src/app/layouts/*"],
     }
   },
   "angularCompilerOptions": {

@@ -1,4 +1,4 @@
-import { afterNextRender, Component, inject, signal } from '@angular/core';
+import { afterNextRender, Component, inject, ViewEncapsulation } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet, RoutesRecognized } from '@angular/router';
 import { filter } from 'rxjs';
 
@@ -7,9 +7,9 @@ import { filter } from 'rxjs';
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './playground.html',
   styles: ``,
+  encapsulation: ViewEncapsulation.None,
 })
 export class Playground {
-  protected readonly title = signal('v21');
   private readonly router = inject(Router);
 
   constructor() {
@@ -19,9 +19,9 @@ export class Playground {
     // We use afterNextRender to ensure this only runs on the client
     afterNextRender(() => {
       this.router.events.pipe(filter((event) => event instanceof RoutesRecognized)).subscribe((event) => {
-        const nextIndex = event.state.root.firstChild?.data['animation'] ?? 0;
+        const nextIndex = event.state.root.firstChild?.firstChild?.firstChild?.data['animation'] ?? 0;
         const direction = nextIndex > currentIndex ? 'forward' : 'backward';
-
+        console.log(`route change`, { currentIndex, nextIndex });
         // Update classes
         const root = document.documentElement;
         root.classList.remove('forward', 'backward');

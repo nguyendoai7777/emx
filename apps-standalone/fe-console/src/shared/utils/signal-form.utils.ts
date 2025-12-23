@@ -1,4 +1,6 @@
 import {
+  customError,
+  CustomValidationError,
   FieldState,
   FieldTree,
   FieldValidator,
@@ -9,9 +11,11 @@ import {
   SchemaOrSchemaFn,
   SchemaPath,
   validate,
+  WithoutField,
 } from '@angular/forms/signals';
 
 import { WritableSignal } from '@angular/core';
+import { CastString, ControlFieldKind } from '@emx/types';
 
 type FieldNodeLike = {
   structure?: {
@@ -54,8 +58,7 @@ export const markAllAsDirty = <T>(field: FieldTree<T> | FieldState<any>) => {
 };
 
 export const fieldError = <TValue>(field: MaybeFieldTree<TValue>) => {
-  console.log(`field `, field?.().errors());
-  return (field?.().touched() || field?.().dirty()) && field?.().invalid() ? 'error' : 'normal';
+  return (field?.().touched() || field?.().dirty()) && field?.().invalid() ? 'error' : '';
 };
 
 // Cast-Type definition matching all overloads of the form() function
@@ -73,3 +76,14 @@ type CreateFieldValidatorFn = <T, K extends PathKind>(
 ) => void;
 
 export const createFieldValidator: CreateFieldValidatorFn = validate;
+
+interface ValidationError {
+  /** Identifies the kind of error. */
+  readonly kind: CastString<ControlFieldKind>;
+  /** Human readable error message. */
+  readonly message?: string;
+}
+
+type CreateFCustomErrorFn = <E extends ValidationError>(obj?: E) => WithoutField<CustomValidationError>;
+
+export const createCustomError: CreateFCustomErrorFn = customError;

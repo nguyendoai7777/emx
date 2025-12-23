@@ -1,0 +1,79 @@
+{
+  "$schema": "https://raw.githubusercontent.com/JetBrains/web-types/master/schema/web-types.json",
+  "name": "extended-attr",
+  "version": "1.0.0",
+  "js-types-syntax": "typescript",
+  "description-markup": "markdown",
+  "framework": "angular",
+  "framework-config": {
+    "enable-when": {
+      "node-packages": ["@angular/core"]
+    }
+  },
+  "contributions": {
+    "html": {
+      "attributes": [
+        {
+          "name": "[attr.touched]",
+          "description": "`boolean` - mark element just touched - use for form field"
+        },
+        {
+          "name": "[attr.invalid]",
+          "description": "`boolean` - mark element invalid state - use for form field"
+        }
+      ],
+      "elements": [
+        {
+          "name": "model-viewer",
+          "description": "HTML Web Component for 3D content",
+          "doc-url": "https://modelviewer.dev/documentation/",
+          "attributes": [
+            {
+              "name": "alt",
+              "description": "Description of the 3D model."
+            },
+            {
+              "name": "shadow-intensity",
+              "description": "use shadow"
+            },
+            {
+              "name": "touch-action",
+              "description": "Decides how the model responds to touch events.",
+              "value": {
+                "kind": "plain",
+                "type": "'pan-x'| 'pan-y' | ''",
+                "default": ""
+              }
+            },
+            {
+              "name": "camera-controls",
+              "description": "enable camera controls (zoom, pan, rotate)",
+              "required": false,
+              "type": "boolean",
+              "value": {
+                "type": "boolean",
+                "default": "true",
+                "kind": "no-value"
+              }
+            },
+            {
+              "name": "src",
+              "description": "URL to the 3D model file (.glb or .gltf).",
+              "required": true
+            },
+            {
+              "name": "camera-controls",
+              "description": "Enables user interaction (orbit, pan, zoom).",
+              "type": "boolean"
+            },
+            {
+              "name": "auto-rotate",
+              "description": "Automatically rotates the model slowly around the Y-axis.",
+              "type": "boolean"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

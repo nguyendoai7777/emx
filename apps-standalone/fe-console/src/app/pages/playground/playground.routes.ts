@@ -28,6 +28,18 @@ const PlaygroundRoutes: Routes = [
         data: { animation: 4 },
         loadComponent: () => import('./pages/named-timeline/named-timeline').then((m) => m.NamedTimeline),
       },
+      {
+        path: 'signal-form',
+        title: 'Signal Form New API',
+        data: { animation: 5 },
+        loadComponent: () => import('./pages/signal-form-ex/signal-form-ex').then((m) => m.SignalFormEx),
+      },
+      {
+        path: 'ex-signal-form',
+        title: 'Experimental Signal Form New API',
+        data: { animation: 6 },
+        loadComponent: () => import('./pages/ex-signal-form/ex-signal-form').then((m) => m.ExSignalForm),
+      },
     ],
   },
 ];

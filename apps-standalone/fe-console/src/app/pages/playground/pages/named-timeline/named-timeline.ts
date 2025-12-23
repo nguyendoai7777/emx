@@ -1,8 +1,9 @@
 import { Component, signal } from '@angular/core';
+import { ExSignalForm } from '@pages/playground/pages/ex-signal-form/ex-signal-form';
 
 @Component({
   selector: 'app-named-timeline',
-  imports: [],
+  imports: [ExSignalForm],
   templateUrl: './named-timeline.html',
   styleUrl: './named-timeline.css',
 })
