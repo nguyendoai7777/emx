@@ -48,6 +48,7 @@ field-control {
     &.error {
       color: var(--field-error-color, var(--color-red-500, #f44336));
     }
+
     &.warning {
       color: var(--field-warning-color, var(--color-orange-400, #ff8904ff));
     }
